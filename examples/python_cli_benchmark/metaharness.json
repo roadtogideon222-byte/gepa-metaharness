@@ -1,0 +1,30 @@
+{
+  "objective": "Improve a real coding-agent harness around a small Python CLI fixture so bootstrap, validation, unit tests, and CLI smoke checks all work correctly.",
+  "constraints": [
+    "Keep the workflow deterministic.",
+    "Focus on AGENTS.md, GEMINI.md, and scripts under baseline/scripts.",
+    "Avoid editing fixture_repo unless absolutely necessary."
+  ],
+  "baseline_dir": "baseline",
+  "runs_dir": "runs",
+  "tasks_file": "tasks.json",
+  "required_files": [
+    "AGENTS.md",
+    "GEMINI.md",
+    "scripts/bootstrap.sh",
+    "scripts/validate.sh",
+    "scripts/test.sh"
+  ],
+  "backends": {
+    "codex": {
+      "sandbox_mode": "workspace-write",
+      "approval_policy": "never",
+      "use_oss": true,
+      "local_provider": "ollama",
+      "model": "gpt-oss:20b",
+      "proposal_timeout_seconds": 240
+    }
+  },
+  "example_profile": "coding-tool-python-cli",
+  "default_budget": 1
+}

@@ -1,0 +1,58 @@
+import tempfile
+import unittest
+from pathlib import Path
+
+from metaharness import EvaluationResult, FakeBackend, ValidationResult, optimize_harness
+
+
+class SimpleValidator:
+    def validate(self, workspace: Path) -> ValidationResult:
+        exists = (workspace / "message.txt").exists()
+        return ValidationResult(ok=exists, summary="message.txt must exist", metrics={"exists": float(exists)})
+
+
+class ContainsBetterEvaluator:
+    def evaluate(self, workspace: Path) -> EvaluationResult:
+        text = (workspace / "message.txt").read_text(encoding="utf-8")
+        score = 1.0 if "better" in text else 0.0
+        return EvaluationResult(
+            objective=score,
+            metrics={"contains_better": score},
+            summary="Checks whether the optimized token is present.",
+        )
+
+
+class EngineTests(unittest.TestCase):
+    def test_engine_improves_candidate_with_fake_backend(self) -> None:
+        with tempfile.TemporaryDirectory() as tmpdir:
+            root = Path(tmpdir)
+            baseline = root / "baseline"
+            baseline.mkdir()
+            (baseline / "message.txt").write_text("baseline\n", encoding="utf-8")
+            run_dir = root / "runs" / "demo"
+
+            result = optimize_harness(
+                baseline=baseline,
+                proposer=FakeBackend(
+                    mutation=lambda request: {
+                        "relative_path": "message.txt",
+                        "content": "this is better\n",
+                        "summary": f"Improved {request.candidate_id}.",
+                    }
+                ),
+                validator=SimpleValidator(),
+                evaluator=ContainsBetterEvaluator(),
+                run_dir=run_dir,
+                budget=1,
+                objective="Make message.txt better.",
+            )
+
+            self.assertEqual("c0001", result.best_candidate_id)
+            self.assertEqual(1.0, result.best_objective)
+            self.assertTrue((run_dir / "indexes" / "leaderboard.json").exists())
+            self.assertTrue((run_dir / "candidates" / "c0001" / "proposal" / "workspace.diff").exists())
+            self.assertEqual("this is better\n", (result.best_workspace_dir / "message.txt").read_text(encoding="utf-8"))
+
+
+if __name__ == "__main__":
+    unittest.main()

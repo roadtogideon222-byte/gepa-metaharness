@@ -1,0 +1,52 @@
+# Benchmark Results
+
+As of April 1, 2026, these are the real provider runs captured in this repository.
+
+## `python_fixture_benchmark`
+
+| Provider | Run ID | Best Objective | Improved | Duration (s) | Notes |
+| --- | --- | ---: | :---: | ---: | --- |
+| Hosted Codex | `hosted-codex-20260401` | `1.000` | yes | `153.231` | Solved in 1 proposal iteration. |
+| Ollama `gpt-oss:20b` | `ollama-20b-20260401` | `0.050` | no | `240.149` | Proposal timed out at `240s`. |
+| Ollama `gpt-oss:120b` | `ollama-120b-20260401` | `1.000` | yes | `274.820` | Solved in 1 proposal iteration. |
+
+Winning runs changed the harness files:
+
+- `AGENTS.md`
+- `GEMINI.md`
+- `scripts/bootstrap.sh`
+- `scripts/test.sh`
+- `scripts/validate.sh`
+
+Run directories:
+
+- `examples/python_fixture_benchmark/runs/hosted-codex-20260401`
+- `examples/python_fixture_benchmark/runs/ollama-20b-20260401`
+- `examples/python_fixture_benchmark/runs/ollama-120b-20260401`
+
+## `python_cli_benchmark`
+
+| Provider | Run ID | Best Objective | Improved | Duration (s) | Notes |
+| --- | --- | ---: | :---: | ---: | --- |
+| Hosted Codex | `hosted-codex-20260401` | `1.000` | yes | `155.489` | Solved in 1 proposal iteration. |
+| Ollama `gpt-oss:20b` | `ollama-20b-20260401` | `0.045` | no | `240.052` | Proposal timed out at `240s`. |
+
+Winning hosted run changed the harness files:
+
+- `AGENTS.md`
+- `GEMINI.md`
+- `scripts/bootstrap.sh`
+- `scripts/test.sh`
+- `scripts/validate.sh`
+
+Run directories:
+
+- `examples/python_cli_benchmark/runs/hosted-codex-20260401`
+- `examples/python_cli_benchmark/runs/ollama-20b-20260401`
+
+## Takeaways
+
+- There is no `metaharness` product blocker for hosted Codex. The important requirement is using `--hosted` when a project config defaults to local Ollama.
+- On these benchmarks, hosted Codex was faster than local `gpt-oss:120b` and solved both tasks in a single proposal iteration.
+- On these same runs, local `gpt-oss:20b` hit the configured `240s` proposal timeout on both benchmarks and did not improve the baseline.
+- Reporting now filters transient workspace churn like `.venv/` and `__pycache__/` so summaries highlight actual harness edits rather than bootstrap side effects.

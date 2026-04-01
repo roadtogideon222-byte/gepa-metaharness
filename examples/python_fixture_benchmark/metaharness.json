@@ -1,0 +1,30 @@
+{
+  "objective": "Improve a real coding-agent harness around a small Python fixture repo so bootstrap, validation, and test flows all work correctly.",
+  "constraints": [
+    "Keep the workflow deterministic.",
+    "Focus on AGENTS.md, GEMINI.md, and scripts under baseline/scripts.",
+    "Do not edit the fixture package implementation unless absolutely necessary."
+  ],
+  "baseline_dir": "baseline",
+  "runs_dir": "runs",
+  "tasks_file": "tasks.json",
+  "required_files": [
+    "AGENTS.md",
+    "GEMINI.md",
+    "scripts/bootstrap.sh",
+    "scripts/validate.sh",
+    "scripts/test.sh"
+  ],
+  "backends": {
+    "codex": {
+      "sandbox_mode": "workspace-write",
+      "approval_policy": "never",
+      "use_oss": true,
+      "local_provider": "ollama",
+      "model": "gpt-oss:20b",
+      "proposal_timeout_seconds": 180
+    }
+  },
+  "example_profile": "coding-tool-python-fixture",
+  "default_budget": 1
+}

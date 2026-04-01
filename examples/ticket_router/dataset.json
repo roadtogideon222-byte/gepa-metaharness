@@ -1,0 +1,34 @@
+[
+  {
+    "text": "I was charged twice for the same invoice and need a refund.",
+    "label": "billing"
+  },
+  {
+    "text": "The app crashes every time I upload a PDF from Safari.",
+    "label": "bug"
+  },
+  {
+    "text": "Please add SAML SSO support for our enterprise workspace.",
+    "label": "feature"
+  },
+  {
+    "text": "I found a way to access another user's files through a shared link.",
+    "label": "security"
+  },
+  {
+    "text": "My invoice amount is wrong after upgrading the team plan.",
+    "label": "billing"
+  },
+  {
+    "text": "The export button spins forever and never downloads the report.",
+    "label": "bug"
+  },
+  {
+    "text": "It would help if the dashboard supported scheduled email reports.",
+    "label": "feature"
+  },
+  {
+    "text": "A leaked API key appears in the browser console on login.",
+    "label": "security"
+  }
+]

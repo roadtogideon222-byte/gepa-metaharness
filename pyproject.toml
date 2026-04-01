@@ -1,0 +1,56 @@
+[build-system]
+requires = ["setuptools>=77", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "metaharness"
+version = "0.1.0"
+description = "Filesystem-first harness optimization for coding agents."
+readme = "README.md"
+requires-python = ">=3.11"
+license = "MIT"
+license-files = ["LICENSE"]
+authors = [
+  { name = "Superagentic AI", email = "hello@super-agentic.ai" },
+  { name = "Shashi Jagtap", email = "shashikant.jagtap@icloud.com" },
+  { name = "Shashi Jagtap", email = "shashi@super-agentic.ai" },
+]
+maintainers = [
+  { name = "Superagentic AI", email = "hello@super-agentic.ai" },
+]
+classifiers = [
+  "Development Status :: 3 - Alpha",
+  "Intended Audience :: Developers",
+  "Programming Language :: Python :: 3",
+  "Programming Language :: Python :: 3.11",
+  "Programming Language :: Python :: 3.12",
+  "Programming Language :: Python :: 3.13",
+  "Topic :: Software Development :: Libraries :: Python Modules",
+  "Topic :: Software Development :: Testing",
+]
+keywords = ["agents", "benchmarking", "codex", "evaluation", "harness", "optimization"]
+dependencies = []
+
+[dependency-groups]
+dev = [
+  "mkdocs>=1.6,<2",
+  "mkdocs-material>=9.6,<10",
+]
+
+[project.optional-dependencies]
+dev = [
+  "mkdocs>=1.6,<2",
+  "mkdocs-material>=9.6,<10",
+]
+
+[project.scripts]
+metaharness = "metaharness.cli:main"
+
+[tool.uv]
+package = true
+
+[tool.setuptools.packages.find]
+where = ["src"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
