@@ -38,6 +38,35 @@
   </div>
 </div>
 
+## New Here
+
+<p class="section-intro">
+If you are seeing `metaharness` for the first time, start with the fake backend on a built-in benchmark.
+That gives you the full loop with no model auth, no provider setup, and no local model server.
+</p>
+
+<div class="path-grid">
+  <div class="path-card">
+    <h3>1. Install The CLI</h3>
+    <p>Install the published package from PyPI and confirm the command is available.</p>
+  </div>
+  <div class="path-card">
+    <h3>2. Run One Benchmark</h3>
+    <p>Use the fake backend first so you can learn the workflow before spending model calls.</p>
+  </div>
+  <div class="path-card">
+    <h3>3. Inspect The Evidence</h3>
+    <p>Look at the run summary, candidate ledger, and winning workspace before trying hosted Codex or Ollama.</p>
+  </div>
+</div>
+
+<div class="callout-card" markdown="1">
+<strong>Command formatting note</strong>
+
+Long commands in the docs are wrapped with `\` so they stay readable on smaller screens.
+You can copy them exactly as shown.
+</div>
+
 ## Why This Exists
 
 <p class="section-intro">
@@ -184,7 +213,11 @@ They use real shell scripts, real fixture repositories, and deterministic accept
 Run the fake backend on a real benchmark to see the full loop without provider dependencies.
 
 ```bash
-uv run metaharness run examples/python_fixture_benchmark --backend fake --budget 1 --run-name first-run
+uv run metaharness run \
+  examples/python_fixture_benchmark \
+  --backend fake \
+  --budget 1 \
+  --run-name first-run
 ```
 </div>
 <div class="command-card" markdown="1">
@@ -193,8 +226,12 @@ uv run metaharness run examples/python_fixture_benchmark --backend fake --budget
 Look at the winning candidate, run summary, and candidate ledger.
 
 ```bash
-uv run metaharness inspect examples/python_fixture_benchmark/runs/first-run
-uv run metaharness ledger examples/python_fixture_benchmark/runs/first-run --tsv
+uv run metaharness inspect \
+  examples/python_fixture_benchmark/runs/first-run
+
+uv run metaharness ledger \
+  examples/python_fixture_benchmark/runs/first-run \
+  --tsv
 ```
 </div>
 <div class="command-card" markdown="1">
@@ -203,7 +240,8 @@ uv run metaharness ledger examples/python_fixture_benchmark/runs/first-run --tsv
 Use a saved config to run repeated trials and write JSON plus TSV outputs.
 
 ```bash
-uv run metaharness experiment --config examples/experiment_configs/fake-benchmarks.json
+uv run metaharness experiment \
+  --config examples/experiment_configs/fake-benchmarks.json
 ```
 </div>
 </div>

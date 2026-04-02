@@ -28,7 +28,12 @@ Requirements:
 Important command:
 
 ```bash
-uv run metaharness run examples/python_fixture_benchmark --backend codex --hosted --budget 1 --run-name hosted-codex
+uv run metaharness run \
+  examples/python_fixture_benchmark \
+  --backend codex \
+  --hosted \
+  --budget 1 \
+  --run-name hosted-codex
 ```
 
 Why `--hosted` matters:
@@ -51,13 +56,25 @@ This path is supported and has been exercised with:
 Probe first:
 
 ```bash
-uv run metaharness smoke codex examples/python_fixture_benchmark --probe-only --oss --local-provider ollama --model gpt-oss:20b
+uv run metaharness smoke codex \
+  examples/python_fixture_benchmark \
+  --probe-only \
+  --oss \
+  --local-provider ollama \
+  --model gpt-oss:20b
 ```
 
 Run:
 
 ```bash
-uv run metaharness run examples/python_fixture_benchmark --backend codex --oss --local-provider ollama --model gpt-oss:20b --proposal-timeout 240 --budget 1
+uv run metaharness run \
+  examples/python_fixture_benchmark \
+  --backend codex \
+  --oss \
+  --local-provider ollama \
+  --model gpt-oss:20b \
+  --proposal-timeout 240 \
+  --budget 1
 ```
 
 ## Current Provider Takeaways

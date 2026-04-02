@@ -13,6 +13,8 @@ Show help:
 uv run metaharness --help
 ```
 
+Long commands below are wrapped with `\` so they stay readable and copy cleanly.
+
 Many reporting commands support:
 
 - plain text output by default
@@ -24,7 +26,9 @@ Many reporting commands support:
 Create a new coding-tool project:
 
 ```bash
-uv run metaharness scaffold coding-tool ./my-coding-tool-optimizer
+uv run metaharness scaffold \
+  coding-tool \
+  ./my-coding-tool-optimizer
 ```
 
 Profiles:
@@ -49,7 +53,10 @@ uv run metaharness scaffold coding-tool ./my-project
 Smaller harness aimed at local OSS smoke runs.
 
 ```bash
-uv run metaharness scaffold coding-tool ./my-local-oss-smoke --profile local-oss-smoke
+uv run metaharness scaffold \
+  coding-tool \
+  ./my-local-oss-smoke \
+  --profile local-oss-smoke
 ```
 </div>
 <div class="command-card" markdown="1">
@@ -58,7 +65,10 @@ uv run metaharness scaffold coding-tool ./my-local-oss-smoke --profile local-oss
 Restores bootstrap and test scripts while staying lighter than the full scaffold.
 
 ```bash
-uv run metaharness scaffold coding-tool ./my-local-oss-medium --profile local-oss-medium
+uv run metaharness scaffold \
+  coding-tool \
+  ./my-local-oss-medium \
+  --profile local-oss-medium
 ```
 </div>
 </div>
@@ -68,7 +78,10 @@ uv run metaharness scaffold coding-tool ./my-local-oss-medium --profile local-os
 Run one optimization project:
 
 ```bash
-uv run metaharness run ./my-coding-tool-optimizer --backend fake --budget 1
+uv run metaharness run \
+  ./my-coding-tool-optimizer \
+  --backend fake \
+  --budget 1
 ```
 
 Use this when you want a single benchmark or project run and care about the winning candidate, not aggregate trial statistics.
@@ -91,7 +104,10 @@ Important options:
 Best for smoke checks and development.
 
 ```bash
-uv run metaharness run ./my-coding-tool-optimizer --backend fake --budget 1
+uv run metaharness run \
+  ./my-coding-tool-optimizer \
+  --backend fake \
+  --budget 1
 ```
 </div>
 <div class="command-card" markdown="1">
@@ -100,7 +116,11 @@ uv run metaharness run ./my-coding-tool-optimizer --backend fake --budget 1
 Best current path for real benchmark quality.
 
 ```bash
-uv run metaharness run ./my-coding-tool-optimizer --backend codex --hosted --budget 1
+uv run metaharness run \
+  ./my-coding-tool-optimizer \
+  --backend codex \
+  --hosted \
+  --budget 1
 ```
 </div>
 <div class="command-card" markdown="1">
@@ -109,7 +129,14 @@ uv run metaharness run ./my-coding-tool-optimizer --backend codex --hosted --bud
 Local-only path for OSS model runs.
 
 ```bash
-uv run metaharness run ./my-coding-tool-optimizer --backend codex --oss --local-provider ollama --model gpt-oss:20b --proposal-timeout 240 --budget 1
+uv run metaharness run \
+  ./my-coding-tool-optimizer \
+  --backend codex \
+  --oss \
+  --local-provider ollama \
+  --model gpt-oss:20b \
+  --proposal-timeout 240 \
+  --budget 1
 ```
 </div>
 </div>
@@ -119,7 +146,10 @@ uv run metaharness run ./my-coding-tool-optimizer --backend codex --oss --local-
 Run a benchmark x backend x budget x trial matrix:
 
 ```bash
-uv run metaharness experiment ./examples/python_fixture_benchmark --backend fake --trials 3
+uv run metaharness experiment \
+  ./examples/python_fixture_benchmark \
+  --backend fake \
+  --trials 3
 ```
 
 Use this when you want repeatable benchmark results instead of one-off runs.
@@ -131,7 +161,8 @@ Use this when you want repeatable benchmark results instead of one-off runs.
 The most reusable path for teams.
 
 ```bash
-uv run metaharness experiment --config ./examples/experiment_configs/fake-benchmarks.json
+uv run metaharness experiment \
+  --config ./examples/experiment_configs/fake-benchmarks.json
 ```
 </div>
 <div class="command-card" markdown="1">
@@ -140,7 +171,12 @@ uv run metaharness experiment --config ./examples/experiment_configs/fake-benchm
 Compare how much improvement you get from a larger search budget.
 
 ```bash
-uv run metaharness experiment ./examples/python_fixture_benchmark --backend fake --budget 1 --budget 2 --trials 2
+uv run metaharness experiment \
+  ./examples/python_fixture_benchmark \
+  --backend fake \
+  --budget 1 \
+  --budget 2 \
+  --trials 2
 ```
 </div>
 <div class="command-card" markdown="1">
@@ -149,7 +185,11 @@ uv run metaharness experiment ./examples/python_fixture_benchmark --backend fake
 Send aggregate results straight to a spreadsheet or notebook.
 
 ```bash
-uv run metaharness experiment ./examples/python_fixture_benchmark --backend fake --trials 3 --tsv
+uv run metaharness experiment \
+  ./examples/python_fixture_benchmark \
+  --backend fake \
+  --trials 3 \
+  --tsv
 ```
 </div>
 </div>
@@ -186,7 +226,12 @@ uv run metaharness smoke codex ./my-coding-tool-optimizer --probe-only
 Probe the local Ollama path:
 
 ```bash
-uv run metaharness smoke codex ./my-coding-tool-optimizer --probe-only --oss --local-provider ollama --model gpt-oss:20b
+uv run metaharness smoke codex \
+  ./my-coding-tool-optimizer \
+  --probe-only \
+  --oss \
+  --local-provider ollama \
+  --model gpt-oss:20b
 ```
 
 Use this when you want to verify the environment, provider, and model path before running a benchmark.
@@ -196,7 +241,8 @@ Use this when you want to verify the environment, provider, and model path befor
 Inspect one completed run:
 
 ```bash
-uv run metaharness inspect ./examples/python_fixture_benchmark/runs/hosted-codex-20260401
+uv run metaharness inspect \
+  ./examples/python_fixture_benchmark/runs/hosted-codex-20260401
 ```
 
 This is the quickest human-readable view of:
@@ -212,13 +258,16 @@ This is the quickest human-readable view of:
 Export the per-candidate ledger for one run:
 
 ```bash
-uv run metaharness ledger ./examples/python_fixture_benchmark/runs/hosted-codex-20260401
+uv run metaharness ledger \
+  ./examples/python_fixture_benchmark/runs/hosted-codex-20260401
 ```
 
 TSV export:
 
 ```bash
-uv run metaharness ledger ./examples/python_fixture_benchmark/runs/hosted-codex-20260401 --tsv
+uv run metaharness ledger \
+  ./examples/python_fixture_benchmark/runs/hosted-codex-20260401 \
+  --tsv
 ```
 
 Use this when you want one row per candidate with outcomes, changed-file counts, summaries, and scope violations.
@@ -228,13 +277,16 @@ Use this when you want one row per candidate with outcomes, changed-file counts,
 Summarize all runs in a project:
 
 ```bash
-uv run metaharness summarize ./examples/python_fixture_benchmark
+uv run metaharness summarize \
+  ./examples/python_fixture_benchmark
 ```
 
 TSV export:
 
 ```bash
-uv run metaharness summarize ./examples/python_fixture_benchmark --tsv
+uv run metaharness summarize \
+  ./examples/python_fixture_benchmark \
+  --tsv
 ```
 
 Use this when you want a project-wide view of scores, durations, and outcome counts.

@@ -89,6 +89,10 @@ body,
 .md-typeset pre > code {
   border: 0;
   background: transparent;
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+  word-break: break-word;
+  line-height: 1.55;
 }
 
 .highlight,
@@ -97,6 +101,15 @@ body,
   border: 1px solid rgba(112, 199, 255, 0.16);
   border-radius: 14px;
   box-shadow: 0 0 0 1px rgba(0, 0, 0, 0.45), 0 18px 50px rgba(0, 0, 0, 0.42);
+  overflow-x: auto;
+}
+
+.md-typeset pre {
+  padding: 0.9rem 1rem;
+}
+
+.md-typeset pre code {
+  font-size: 0.8rem;
 }
 
 .highlight .gp,
@@ -333,6 +346,33 @@ body,
 
 .command-card pre {
   margin-top: 0.8rem;
+}
+
+.path-grid {
+  display: grid;
+  gap: 1rem;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  margin: 1rem 0 2rem;
+}
+
+.path-card {
+  padding: 1.1rem 1.1rem 1rem;
+  border: 1px solid rgba(84, 245, 213, 0.16);
+  border-radius: 18px;
+  background:
+    radial-gradient(circle at top right, rgba(84, 245, 213, 0.08), transparent 30%),
+    linear-gradient(180deg, rgba(7, 10, 11, 0.98), rgba(9, 9, 9, 0.98));
+  box-shadow: 0 14px 28px rgba(0, 0, 0, 0.18);
+}
+
+.path-card h3 {
+  margin-top: 0;
+  margin-bottom: 0.45rem;
+  color: var(--mh-lime);
+}
+
+.path-card p:last-child {
+  margin-bottom: 0;
 }
 
 .md-typeset .grid-list {

@@ -44,8 +44,19 @@ Typical runs:
 
 ```bash
 uv run metaharness run examples/python_fixture_benchmark --backend fake --budget 1
-uv run metaharness run examples/python_fixture_benchmark --backend codex --hosted --budget 1
-uv run metaharness run examples/python_fixture_benchmark --backend codex --oss --local-provider ollama --model gpt-oss:120b --proposal-timeout 420 --budget 1
+uv run metaharness run \
+  examples/python_fixture_benchmark \
+  --backend codex \
+  --hosted \
+  --budget 1
+uv run metaharness run \
+  examples/python_fixture_benchmark \
+  --backend codex \
+  --oss \
+  --local-provider ollama \
+  --model gpt-oss:120b \
+  --proposal-timeout 420 \
+  --budget 1
 ```
 
 ## `python_cli_benchmark`
@@ -79,8 +90,19 @@ Typical runs:
 
 ```bash
 uv run metaharness run examples/python_cli_benchmark --backend fake --budget 1
-uv run metaharness run examples/python_cli_benchmark --backend codex --hosted --budget 1
-uv run metaharness run examples/python_cli_benchmark --backend codex --oss --local-provider ollama --model gpt-oss:20b --proposal-timeout 240 --budget 1
+uv run metaharness run \
+  examples/python_cli_benchmark \
+  --backend codex \
+  --hosted \
+  --budget 1
+uv run metaharness run \
+  examples/python_cli_benchmark \
+  --backend codex \
+  --oss \
+  --local-provider ollama \
+  --model gpt-oss:20b \
+  --proposal-timeout 240 \
+  --budget 1
 ```
 
 ## `ticket_router`

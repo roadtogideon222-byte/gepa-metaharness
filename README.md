@@ -71,25 +71,33 @@ uv sync
 Run the fake backend on a real benchmark:
 
 ```bash
-uv run metaharness run examples/python_fixture_benchmark --backend fake --budget 1 --run-name quickstart
+uv run metaharness run \
+  examples/python_fixture_benchmark \
+  --backend fake \
+  --budget 1 \
+  --run-name quickstart
 ```
 
 Inspect the run:
 
 ```bash
-uv run metaharness inspect examples/python_fixture_benchmark/runs/quickstart
+uv run metaharness inspect \
+  examples/python_fixture_benchmark/runs/quickstart
 ```
 
 Export the candidate ledger:
 
 ```bash
-uv run metaharness ledger examples/python_fixture_benchmark/runs/quickstart --tsv
+uv run metaharness ledger \
+  examples/python_fixture_benchmark/runs/quickstart \
+  --tsv
 ```
 
 Run a saved experiment matrix:
 
 ```bash
-uv run metaharness experiment --config examples/experiment_configs/fake-benchmarks.json
+uv run metaharness experiment \
+  --config examples/experiment_configs/fake-benchmarks.json
 ```
 
 ## Core Capabilities
@@ -217,7 +225,12 @@ Requirements:
 Run a real benchmark with hosted Codex:
 
 ```bash
-uv run metaharness run examples/python_fixture_benchmark --backend codex --hosted --budget 1 --run-name hosted-codex
+uv run metaharness run \
+  examples/python_fixture_benchmark \
+  --backend codex \
+  --hosted \
+  --budget 1 \
+  --run-name hosted-codex
 ```
 
 Important:
@@ -230,19 +243,40 @@ Important:
 Probe the local setup:
 
 ```bash
-uv run metaharness smoke codex examples/python_fixture_benchmark --probe-only --oss --local-provider ollama --model gpt-oss:20b
+uv run metaharness smoke codex \
+  examples/python_fixture_benchmark \
+  --probe-only \
+  --oss \
+  --local-provider ollama \
+  --model gpt-oss:20b
 ```
 
 Run with `gpt-oss:20b`:
 
 ```bash
-uv run metaharness run examples/python_fixture_benchmark --backend codex --oss --local-provider ollama --model gpt-oss:20b --proposal-timeout 240 --budget 1 --run-name ollama-20b
+uv run metaharness run \
+  examples/python_fixture_benchmark \
+  --backend codex \
+  --oss \
+  --local-provider ollama \
+  --model gpt-oss:20b \
+  --proposal-timeout 240 \
+  --budget 1 \
+  --run-name ollama-20b
 ```
 
 Run with `gpt-oss:120b`:
 
 ```bash
-uv run metaharness run examples/python_fixture_benchmark --backend codex --oss --local-provider ollama --model gpt-oss:120b --proposal-timeout 420 --budget 1 --run-name ollama-120b
+uv run metaharness run \
+  examples/python_fixture_benchmark \
+  --backend codex \
+  --oss \
+  --local-provider ollama \
+  --model gpt-oss:120b \
+  --proposal-timeout 420 \
+  --budget 1 \
+  --run-name ollama-120b
 ```
 
 ## Benchmarks And Examples

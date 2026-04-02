@@ -1,6 +1,7 @@
 # Getting Started
 
 This page walks through the fastest path from a clean checkout to a real `metaharness` run that you can inspect.
+It is written for newcomers first.
 
 ## Prerequisites
 
@@ -10,6 +11,13 @@ This page walks through the fastest path from a clean checkout to a real `metaha
 - optional: Ollama with `gpt-oss:20b` or `gpt-oss:120b` for local runs
 
 ## Install
+
+<div class="callout-card" markdown="1">
+<strong>Recommended newcomer path</strong>
+
+If you only want to use the released CLI, install from PyPI with `uv tool install`.
+If you want to run the built-in examples from this repository, use a source checkout with `uv sync`.
+</div>
 
 Published package:
 
@@ -34,6 +42,13 @@ If you want to add the library to another Python project:
 ```bash
 uv add superagentic-metaharness
 ```
+
+<div class="callout-card" markdown="1">
+<strong>Command formatting note</strong>
+
+Long commands on this page are wrapped with `\` so they stay readable on narrower screens.
+You can copy them exactly as written.
+</div>
 
 If you are working from a source checkout of this repository, create the project environment with:
 
@@ -62,7 +77,11 @@ Use the fake backend on a real benchmark. This exercises the full loop without n
 </div>
 
 ```bash
-uv run metaharness run examples/python_fixture_benchmark --backend fake --budget 1 --run-name first-run
+uv run metaharness run \
+  examples/python_fixture_benchmark \
+  --backend fake \
+  --budget 1 \
+  --run-name first-run
 ```
 
 Expected result:
@@ -80,7 +99,8 @@ Expected result:
 Use this when you want a quick human-readable summary of the candidates and outcomes.
 
 ```bash
-uv run metaharness inspect examples/python_fixture_benchmark/runs/first-run
+uv run metaharness inspect \
+  examples/python_fixture_benchmark/runs/first-run
 ```
 </div>
 <div class="command-card" markdown="1">
@@ -89,7 +109,9 @@ uv run metaharness inspect examples/python_fixture_benchmark/runs/first-run
 Use this when you want one row per candidate with outcomes, changed-file counts, and validation or evaluation summaries.
 
 ```bash
-uv run metaharness ledger examples/python_fixture_benchmark/runs/first-run --tsv
+uv run metaharness ledger \
+  examples/python_fixture_benchmark/runs/first-run \
+  --tsv
 ```
 </div>
 <div class="command-card" markdown="1">
@@ -108,7 +130,8 @@ uv run metaharness summarize examples/python_fixture_benchmark
 Once the single-run flow makes sense, move to repeated trials:
 
 ```bash
-uv run metaharness experiment --config examples/experiment_configs/fake-benchmarks.json
+uv run metaharness experiment \
+  --config examples/experiment_configs/fake-benchmarks.json
 ```
 
 This writes:
@@ -141,7 +164,12 @@ uv run metaharness smoke codex examples/python_fixture_benchmark --probe-only
 ### Run Hosted Codex
 
 ```bash
-uv run metaharness run examples/python_fixture_benchmark --backend codex --hosted --budget 1 --run-name hosted-codex
+uv run metaharness run \
+  examples/python_fixture_benchmark \
+  --backend codex \
+  --hosted \
+  --budget 1 \
+  --run-name hosted-codex
 ```
 </div>
 </div>
@@ -161,21 +189,42 @@ Requirements:
 ### Probe The Local Path
 
 ```bash
-uv run metaharness smoke codex examples/python_fixture_benchmark --probe-only --oss --local-provider ollama --model gpt-oss:20b
+uv run metaharness smoke codex \
+  examples/python_fixture_benchmark \
+  --probe-only \
+  --oss \
+  --local-provider ollama \
+  --model gpt-oss:20b
 ```
 </div>
 <div class="command-card" markdown="1">
 ### Run `gpt-oss:20b`
 
 ```bash
-uv run metaharness run examples/python_fixture_benchmark --backend codex --oss --local-provider ollama --model gpt-oss:20b --proposal-timeout 240 --budget 1 --run-name ollama-20b
+uv run metaharness run \
+  examples/python_fixture_benchmark \
+  --backend codex \
+  --oss \
+  --local-provider ollama \
+  --model gpt-oss:20b \
+  --proposal-timeout 240 \
+  --budget 1 \
+  --run-name ollama-20b
 ```
 </div>
 <div class="command-card" markdown="1">
 ### Run `gpt-oss:120b`
 
 ```bash
-uv run metaharness run examples/python_fixture_benchmark --backend codex --oss --local-provider ollama --model gpt-oss:120b --proposal-timeout 420 --budget 1 --run-name ollama-120b
+uv run metaharness run \
+  examples/python_fixture_benchmark \
+  --backend codex \
+  --oss \
+  --local-provider ollama \
+  --model gpt-oss:120b \
+  --proposal-timeout 420 \
+  --budget 1 \
+  --run-name ollama-120b
 ```
 </div>
 </div>
@@ -197,14 +246,22 @@ Available scaffold profiles:
 Examples:
 
 ```bash
-uv run metaharness scaffold coding-tool ./my-local-oss-smoke --profile local-oss-smoke
-uv run metaharness scaffold coding-tool ./my-local-oss-medium --profile local-oss-medium
+uv run metaharness scaffold \
+  coding-tool \
+  ./my-local-oss-smoke \
+  --profile local-oss-smoke
+
+uv run metaharness scaffold \
+  coding-tool \
+  ./my-local-oss-medium \
+  --profile local-oss-medium
 ```
 
 If you want a checked-in experiment workflow for your own project, add a small JSON spec and run:
 
 ```bash
-uv run metaharness experiment --config ./my-experiment.json
+uv run metaharness experiment \
+  --config ./my-experiment.json
 ```
 
 ## What A Successful First Session Looks Like
