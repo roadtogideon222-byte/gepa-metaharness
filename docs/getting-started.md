@@ -179,6 +179,9 @@ Hosted Codex is the strongest current path for real benchmark runs in this repos
 
 ## Use Gemini CLI
 
+Gemini is an experimental backend in the current release.
+Use it if Gemini CLI is already part of your local workflow and you are comfortable with a try-it-yourself path.
+
 Requirements:
 
 - `gemini` CLI installed
@@ -207,10 +210,12 @@ uv run metaharness run \
 </div>
 </div>
 
-Use this path if Gemini CLI is already part of your local workflow.
-The integration is real, but the benchmark evidence in this repository is still thinner than the Codex path.
+The integration is real, but it is not part of the main validated Codex-first release path.
 
 ## Use Pi
+
+Pi is an experimental backend in the current release.
+Use it if Pi is already part of your local workflow and you are comfortable with a try-it-yourself path.
 
 Requirements:
 
@@ -242,6 +247,7 @@ uv run metaharness run \
 
 Pi runs through its JSON print mode and defaults to ephemeral `--no-session` behavior inside `metaharness`.
 This keeps optimization runs isolated from Pi's normal interactive session workflow.
+It is not part of the main validated Codex-first release path.
 
 ## Use Local Codex Over Ollama
 

@@ -142,7 +142,7 @@ uv run metaharness run \
 <div class="command-card" markdown="1">
 ### Gemini CLI
 
-Use Gemini as the proposer backend.
+Use Gemini as an experimental proposer backend.
 
 ```bash
 uv run metaharness run \
@@ -156,7 +156,7 @@ uv run metaharness run \
 <div class="command-card" markdown="1">
 ### Pi
 
-Use Pi in JSON print mode as the proposer backend.
+Use Pi in JSON print mode as an experimental proposer backend.
 
 ```bash
 uv run metaharness run \

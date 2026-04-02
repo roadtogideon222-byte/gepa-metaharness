@@ -9,9 +9,9 @@ Current status:
 
 - `CodexExecBackend` is real and exercised in benchmark runs
 - `FakeBackend` is deterministic and used for tests and smoke runs
-- `GeminiCliBackend` is implemented and ready for smoke runs and project integration
-- `PiCliBackend` is implemented and uses Pi print-mode JSON output for integration
-- `OpenCodeRunBackend` is implemented and uses `opencode run --format json`
+- `GeminiCliBackend` is experimental
+- `PiCliBackend` is experimental and uses Pi print-mode JSON output for integration
+- `OpenCodeRunBackend` is experimental and uses `opencode run --format json`
 
 The current package is Codex-first with an extensible backend interface.
 All real provider benchmark runs currently documented in this repository were executed through the Codex CLI path.
@@ -92,9 +92,14 @@ Based on the recorded benchmark runs in this repository:
 This means the project's current public benchmark evidence is centered on Codex.
 Other coding-agent benchmark writeups may emphasize Claude Code or Opus, but those are not the provider paths currently documented in this repository.
 
-## Gemini CLI
+## Experimental Backends
 
-Gemini is now a real backend in the library.
+The following backends are implemented, but they are not part of the main validated release path today.
+They are best treated as try-it-yourself integrations unless and until they accumulate stronger benchmark evidence in this repository.
+
+### Gemini CLI
+
+Gemini is implemented as an experimental backend.
 
 What is implemented:
 
@@ -115,11 +120,11 @@ uv run metaharness smoke gemini \
 
 Current caveat:
 
-- Gemini is implemented, but the benchmark evidence in this repository is still much thinner than the Codex path
+- Gemini is experimental and the benchmark evidence in this repository is not yet strong enough to present it as a primary backend
 
-## Pi
+### Pi
 
-Pi is now a real backend in the library.
+Pi is implemented as an experimental backend.
 
 What is implemented:
 
@@ -140,11 +145,11 @@ uv run metaharness smoke pi \
 
 Current caveat:
 
-- Pi is implemented and usable, but it is newer than the Codex path and does not yet have benchmark records checked into this repository
+- Pi is experimental and does not yet have successful real benchmark records checked into this repository
 
-## OpenCode
+### OpenCode
 
-OpenCode is now a real backend in the library.
+OpenCode is implemented as an experimental backend.
 
 What is implemented:
 
@@ -165,7 +170,7 @@ uv run metaharness smoke opencode \
 
 Current caveat:
 
-- OpenCode is implemented and usable, but it does not yet have benchmark records checked into this repository
+- OpenCode is experimental and does not yet have benchmark records checked into this repository
 
 ## What To Use In Practice
 
@@ -183,7 +188,5 @@ If you want a local-only workflow:
 
 The next provider milestone after the current Codex path is:
 
-- live smoke and benchmark documentation for Gemini
-- live smoke and benchmark documentation for Pi
-- live smoke and benchmark documentation for OpenCode
-- quality comparison across Codex, Gemini, Pi, and OpenCode on the same real targets
+- either keep the current Codex-first scope
+- or selectively strengthen one experimental backend at a time if there is a concrete user need

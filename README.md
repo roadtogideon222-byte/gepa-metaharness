@@ -12,7 +12,8 @@
 `metaharness` is an open source Python library for optimizing executable harnesses around agentic coding systems.
 It is inspired by the [Meta Harness paper](https://arxiv.org/pdf/2603.28052) and is an unofficial open source implementation of the core ideas in that work.
 The current benchmark evidence in this repository is centered on the Codex CLI path, including hosted Codex and Codex over local Ollama models.
-Gemini CLI and Pi are also implemented as proposer backends, but they are newer integrations and are not yet backed by the same benchmark depth as Codex.
+Codex is the primary and validated backend in this repository today.
+Gemini CLI, Pi, and OpenCode are experimental integrations.
 
 It is built for teams who want to improve the code and files around an agent workflow, not just the prompt.
 That includes instruction files, setup flows, validation scripts, test scripts, routing logic, and other executable support code.
@@ -109,9 +110,9 @@ uv run metaharness experiment \
 - optional write-scope enforcement through `allowed_write_paths`
 - a provider-neutral proposer backend interface
 - a real `CodexExecBackend`
-- a real `GeminiCliBackend`
-- a real `PiCliBackend`
-- a real `OpenCodeRunBackend`
+- an experimental `GeminiCliBackend`
+- an experimental `PiCliBackend`
+- an experimental `OpenCodeRunBackend`
 - a deterministic `FakeBackend`
 - a coding-tool integration for instruction files and script-based harnesses
 - explicit per-candidate outcomes: `keep`, `discard`, `crash`, `timeout`, `no-change`, and `scope-violation`
@@ -146,9 +147,9 @@ Detailed experiment records:
 - Codex is the main validated harness path in this repository today
 - hosted Codex is the strongest current path for real runs
 - local Codex over Ollama works and has been exercised with `gpt-oss:20b` and `gpt-oss:120b`
-- Gemini is implemented as a real backend, but it is not yet benchmark-validated to the same depth as Codex
-- Pi is implemented as a real backend with print-mode JSON integration, but it is newer and not yet benchmark-validated to the same depth as Codex
-- OpenCode is implemented as a real backend, but it is not yet benchmark-validated to the same depth as Codex
+- Gemini is implemented as an experimental backend and is not part of the main validated release path
+- Pi is implemented as an experimental backend with print-mode JSON integration and is not part of the main validated release path
+- OpenCode is implemented as an experimental backend and is not part of the main validated release path
 
 All real provider results currently documented in this repository were produced through the Codex CLI path.
 That includes both hosted Codex runs and local Ollama runs driven through Codex with `gpt-oss` models.
