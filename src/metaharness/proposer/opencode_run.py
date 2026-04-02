@@ -3,31 +3,30 @@ from __future__ import annotations
 import subprocess
 from shutil import which
 from typing import Any
-from pathlib import Path
 
 from ..models import ProposalExecution, ProposalRequest, ProposalResult
 from .base import ProposerBackend
-from .parsers.gemini import parse_gemini_json
+from .parsers.opencode import parse_opencode_jsonl
 
 
-class GeminiCliBackend(ProposerBackend):
-    name = "gemini"
+class OpenCodeRunBackend(ProposerBackend):
+    name = "opencode"
 
     def __init__(
         self,
-        gemini_binary: str = "gemini",
+        opencode_binary: str = "opencode",
         model: str | None = None,
-        output_format: str = "stream-json",
-        sandbox: bool | str | None = None,
-        approval_mode: str | None = None,
+        agent: str | None = None,
+        variant: str | None = None,
+        output_format: str = "json",
         extra_args: list[str] | None = None,
         timeout_seconds: float | None = None,
     ) -> None:
-        self.gemini_binary = gemini_binary
+        self.opencode_binary = opencode_binary
         self.model = model
+        self.agent = agent
+        self.variant = variant
         self.output_format = output_format
-        self.sandbox = sandbox
-        self.approval_mode = approval_mode
         self.extra_args = extra_args or []
         self.timeout_seconds = timeout_seconds
 
@@ -41,17 +40,17 @@ class GeminiCliBackend(ProposerBackend):
         stderr_path = proposal_dir / "stderr.txt"
         prompt = request.prompt_path.read_text(encoding="utf-8")
 
-        command = [self.gemini_binary]
+        command = [self.opencode_binary, "run"]
+        if self.output_format:
+            command.extend(["--format", self.output_format])
         if self.model:
             command.extend(["--model", self.model])
-        if self.output_format:
-            command.extend(["--output-format", self.output_format])
-        if self.sandbox is not None:
-            command.extend(["--sandbox", str(self.sandbox).lower()])
-        if self.approval_mode:
-            command.extend(["--approval-mode", self.approval_mode])
+        if self.agent:
+            command.extend(["--agent", self.agent])
+        if self.variant:
+            command.extend(["--variant", self.variant])
         command.extend(self.extra_args)
-        command.extend(["-p", prompt])
+        command.append(prompt)
 
         timed_out = False
         timeout_message = ""
@@ -71,9 +70,9 @@ class GeminiCliBackend(ProposerBackend):
             stdout = _coerce_timeout_stream(exc.stdout)
             stderr = _coerce_timeout_stream(exc.stderr)
             timeout_message = (
-                f"Gemini CLI proposal timed out after {self.timeout_seconds:g}s."
+                f"OpenCode proposal timed out after {self.timeout_seconds:g}s."
                 if self.timeout_seconds is not None
-                else "Gemini CLI proposal timed out."
+                else "OpenCode proposal timed out."
             )
             if timeout_message not in stderr:
                 stderr = f"{stderr}\n{timeout_message}".strip()
@@ -92,14 +91,14 @@ class GeminiCliBackend(ProposerBackend):
         )
 
     def collect(self, execution: ProposalExecution) -> ProposalResult:
-        events, final_text, changed_files = parse_gemini_json(execution.stdout_path)
+        events, final_text, changed_files = parse_opencode_jsonl(execution.stdout_path)
         timed_out = bool(execution.metadata.get("timed_out"))
         applied = execution.returncode == 0 and not timed_out
-        summary = "Gemini CLI execution completed."
+        summary = "OpenCode execution completed."
         if timed_out:
-            summary = str(execution.metadata.get("timeout_message") or "Gemini CLI execution timed out.")
+            summary = str(execution.metadata.get("timeout_message") or "OpenCode execution timed out.")
         elif not applied:
-            summary = "Gemini CLI execution failed."
+            summary = "OpenCode execution failed."
         return ProposalResult(
             applied=applied,
             summary=summary,
@@ -111,31 +110,32 @@ class GeminiCliBackend(ProposerBackend):
             metadata={
                 "command": execution.command,
                 "returncode": execution.returncode,
+                "model": self.model,
+                "agent": self.agent,
+                "variant": self.variant,
                 "output_format": self.output_format,
-                "sandbox": self.sandbox,
-                "approval_mode": self.approval_mode,
                 "timeout_seconds": self.timeout_seconds,
                 "timed_out": timed_out,
             },
         )
 
 
-def probe_gemini_cli(gemini_binary: str = "gemini", timeout_seconds: int = 5) -> dict[str, Any]:
-    resolved_binary = which(gemini_binary)
+def probe_opencode_cli(opencode_binary: str = "opencode", timeout_seconds: int = 5) -> dict[str, Any]:
+    resolved_binary = which(opencode_binary)
     if resolved_binary is None:
         return {
             "ok": False,
-            "binary": gemini_binary,
+            "binary": opencode_binary,
             "resolved_binary": None,
             "version": None,
             "returncode": None,
             "raw_output": "",
-            "error": f"Could not find binary: {gemini_binary}",
+            "error": f"Could not find binary: {opencode_binary}",
         }
 
     try:
         completed = subprocess.run(
-            [gemini_binary, "--version"],
+            [opencode_binary, "--version"],
             text=True,
             capture_output=True,
             timeout=timeout_seconds,
@@ -143,12 +143,12 @@ def probe_gemini_cli(gemini_binary: str = "gemini", timeout_seconds: int = 5) ->
     except subprocess.TimeoutExpired:
         return {
             "ok": False,
-            "binary": gemini_binary,
+            "binary": opencode_binary,
             "resolved_binary": resolved_binary,
             "version": None,
             "returncode": None,
             "raw_output": "",
-            "error": f"Timed out after {timeout_seconds}s probing {gemini_binary}",
+            "error": f"Timed out after {timeout_seconds}s probing {opencode_binary}",
         }
 
     raw_output = "\n".join(
@@ -157,12 +157,12 @@ def probe_gemini_cli(gemini_binary: str = "gemini", timeout_seconds: int = 5) ->
     version = raw_output.splitlines()[0].strip() if raw_output else None
     return {
         "ok": completed.returncode == 0,
-        "binary": gemini_binary,
+        "binary": opencode_binary,
         "resolved_binary": resolved_binary,
         "version": version,
         "returncode": completed.returncode,
         "raw_output": raw_output,
-        "error": None if completed.returncode == 0 else raw_output or f"{gemini_binary} --version failed",
+        "error": None if completed.returncode == 0 else raw_output or f"{opencode_binary} --version failed",
     }
 
 

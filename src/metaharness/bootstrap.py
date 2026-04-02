@@ -28,6 +28,7 @@ _DEFAULT_TOOL_NAMES = (
     "docker",
     "codex",
     "gemini",
+    "opencode",
     "ollama",
 )
 

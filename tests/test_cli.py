@@ -270,6 +270,40 @@ class CliTests(unittest.TestCase):
             self.assertEqual(0, smoke.returncode, smoke.stderr)
             self.assertIn("codex_version=", smoke.stdout)
 
+    def test_smoke_help_lists_all_backends(self) -> None:
+        repo_root = Path(__file__).resolve().parents[1]
+        env = {**os.environ, "PYTHONPATH": "src"}
+
+        smoke_help = subprocess.run(
+            ["python", "-m", "metaharness.cli", "smoke", "--help"],
+            cwd=repo_root,
+            env=env,
+            text=True,
+            capture_output=True,
+        )
+        self.assertEqual(0, smoke_help.returncode, smoke_help.stderr)
+        self.assertIn("{codex,gemini,pi,opencode}", smoke_help.stdout)
+
+        pi_help = subprocess.run(
+            ["python", "-m", "metaharness.cli", "smoke", "pi", "--help"],
+            cwd=repo_root,
+            env=env,
+            text=True,
+            capture_output=True,
+        )
+        self.assertEqual(0, pi_help.returncode, pi_help.stderr)
+        self.assertIn("--proposal-timeout", pi_help.stdout)
+
+        opencode_help = subprocess.run(
+            ["python", "-m", "metaharness.cli", "smoke", "opencode", "--help"],
+            cwd=repo_root,
+            env=env,
+            text=True,
+            capture_output=True,
+        )
+        self.assertEqual(0, opencode_help.returncode, opencode_help.stderr)
+        self.assertIn("--proposal-timeout", opencode_help.stdout)
+
     def test_experiment_command_writes_results(self) -> None:
         repo_root = Path(__file__).resolve().parents[1]
         with tempfile.TemporaryDirectory() as tmpdir:

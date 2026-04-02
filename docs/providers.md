@@ -9,7 +9,9 @@ Current status:
 
 - `CodexExecBackend` is real and exercised in benchmark runs
 - `FakeBackend` is deterministic and used for tests and smoke runs
-- `GeminiCliBackend` exists as a scaffold and is not yet at parity with Codex
+- `GeminiCliBackend` is implemented and ready for smoke runs and project integration
+- `PiCliBackend` is implemented and uses Pi print-mode JSON output for integration
+- `OpenCodeRunBackend` is implemented and uses `opencode run --format json`
 
 The current package is Codex-first with an extensible backend interface.
 All real provider benchmark runs currently documented in this repository were executed through the Codex CLI path.
@@ -90,6 +92,81 @@ Based on the recorded benchmark runs in this repository:
 This means the project's current public benchmark evidence is centered on Codex.
 Other coding-agent benchmark writeups may emphasize Claude Code or Opus, but those are not the provider paths currently documented in this repository.
 
+## Gemini CLI
+
+Gemini is now a real backend in the library.
+
+What is implemented:
+
+- non-interactive Gemini CLI invocation
+- `stream-json` parsing
+- model override support
+- approval mode and sandbox config wiring
+- proposal timeout handling
+- `metaharness smoke gemini`
+
+Useful command:
+
+```bash
+uv run metaharness smoke gemini \
+  ./my-coding-tool-optimizer \
+  --probe-only
+```
+
+Current caveat:
+
+- Gemini is implemented, but the benchmark evidence in this repository is still much thinner than the Codex path
+
+## Pi
+
+Pi is now a real backend in the library.
+
+What is implemented:
+
+- Pi CLI invocation in `--mode json`
+- ephemeral `--no-session` default for optimization runs
+- JSON event parsing for assistant text, tool usage, command output, and likely file changes
+- model override support
+- proposal timeout handling
+- `metaharness smoke pi`
+
+Useful command:
+
+```bash
+uv run metaharness smoke pi \
+  ./my-coding-tool-optimizer \
+  --probe-only
+```
+
+Current caveat:
+
+- Pi is implemented and usable, but it is newer than the Codex path and does not yet have benchmark records checked into this repository
+
+## OpenCode
+
+OpenCode is now a real backend in the library.
+
+What is implemented:
+
+- non-interactive `opencode run` invocation
+- JSON event parsing for text, tool usage, command execution, and likely changed files
+- model override support
+- agent and variant config wiring
+- proposal timeout handling
+- `metaharness smoke opencode`
+
+Useful command:
+
+```bash
+uv run metaharness smoke opencode \
+  ./my-coding-tool-optimizer \
+  --probe-only
+```
+
+Current caveat:
+
+- OpenCode is implemented and usable, but it does not yet have benchmark records checked into this repository
+
 ## What To Use In Practice
 
 If you want the most reliable current path:
@@ -106,5 +183,7 @@ If you want a local-only workflow:
 
 The next provider milestone after the current Codex path is:
 
-- Gemini parity
-- Pi backend integration
+- live smoke and benchmark documentation for Gemini
+- live smoke and benchmark documentation for Pi
+- live smoke and benchmark documentation for OpenCode
+- quality comparison across Codex, Gemini, Pi, and OpenCode on the same real targets

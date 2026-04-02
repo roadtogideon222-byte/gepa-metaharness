@@ -301,7 +301,7 @@ def _resolve_models(
     resolved_options: dict[str, Any],
     models: Sequence[str] | None,
 ) -> list[str | None]:
-    if backend not in {"codex", "gemini"}:
+    if backend not in {"codex", "gemini", "pi", "opencode"}:
         return [None]
     if models:
         return [str(value) for value in models]
@@ -317,7 +317,7 @@ def _per_run_overrides(
     model: str | None,
 ) -> dict[str, Any] | None:
     overrides = dict(backend_overrides or {})
-    if backend in {"codex", "gemini"} and model is not None:
+    if backend in {"codex", "gemini", "pi", "opencode"} and model is not None:
         overrides["model"] = model
     return overrides or None
 

@@ -139,6 +139,34 @@ uv run metaharness run \
   --budget 1
 ```
 </div>
+<div class="command-card" markdown="1">
+### Gemini CLI
+
+Use Gemini as the proposer backend.
+
+```bash
+uv run metaharness run \
+  ./my-coding-tool-optimizer \
+  --backend gemini \
+  --model gemini-2.5-pro \
+  --proposal-timeout 180 \
+  --budget 1
+```
+</div>
+<div class="command-card" markdown="1">
+### Pi
+
+Use Pi in JSON print mode as the proposer backend.
+
+```bash
+uv run metaharness run \
+  ./my-coding-tool-optimizer \
+  --backend pi \
+  --model anthropic/claude-sonnet-4-5 \
+  --proposal-timeout 180 \
+  --budget 1
+```
+</div>
 </div>
 
 ## `experiment`
@@ -235,6 +263,40 @@ uv run metaharness smoke codex \
 ```
 
 Use this when you want to verify the environment, provider, and model path before running a benchmark.
+
+## `smoke gemini`
+
+Probe the Gemini CLI path before spending model calls:
+
+```bash
+uv run metaharness smoke gemini ./my-coding-tool-optimizer --probe-only
+```
+
+Run one Gemini-backed smoke iteration:
+
+```bash
+uv run metaharness smoke gemini \
+  ./my-coding-tool-optimizer \
+  --budget 1 \
+  --model gemini-2.5-pro
+```
+
+## `smoke pi`
+
+Probe the Pi path before spending model calls:
+
+```bash
+uv run metaharness smoke pi ./my-coding-tool-optimizer --probe-only
+```
+
+Run one Pi-backed smoke iteration:
+
+```bash
+uv run metaharness smoke pi \
+  ./my-coding-tool-optimizer \
+  --budget 1 \
+  --model anthropic/claude-sonnet-4-5
+```
 
 ## `inspect`
 

@@ -11,6 +11,8 @@ from .models import (
 from .proposer.codex_exec import CodexExecBackend
 from .proposer.fake import FakeBackend
 from .proposer.gemini_cli import GeminiCliBackend
+from .proposer.opencode_run import OpenCodeRunBackend
+from .proposer.pi_cli import PiCliBackend
 
 __all__ = [
     "AgentEvent",
@@ -19,7 +21,9 @@ __all__ = [
     "EvaluationResult",
     "FakeBackend",
     "GeminiCliBackend",
+    "OpenCodeRunBackend",
     "OptimizeResult",
+    "PiCliBackend",
     "ProposalRequest",
     "ProposalResult",
     "ValidationResult",

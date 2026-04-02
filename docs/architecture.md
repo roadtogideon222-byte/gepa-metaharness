@@ -48,13 +48,15 @@ Current backends:
 
 - `CodexExecBackend`
 - `FakeBackend`
-- `GeminiCliBackend` scaffold
+- `GeminiCliBackend`
+- `PiCliBackend`
 
 Key files:
 
 - `src/metaharness/proposer/codex_exec.py`
 - `src/metaharness/proposer/fake.py`
 - `src/metaharness/proposer/gemini_cli.py`
+- `src/metaharness/proposer/pi_cli.py`
 
 ### Coding Tool Integration
 

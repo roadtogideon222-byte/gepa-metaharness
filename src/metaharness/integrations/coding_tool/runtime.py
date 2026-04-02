@@ -11,6 +11,8 @@ from ...models import EvaluationResult, ValidationResult
 from ...proposer.codex_exec import CodexExecBackend
 from ...proposer.fake import FakeBackend
 from ...proposer.gemini_cli import GeminiCliBackend
+from ...proposer.opencode_run import OpenCodeRunBackend
+from ...proposer.pi_cli import PiCliBackend
 from .config import CodingToolProject, CodingToolTask
 
 
@@ -189,7 +191,34 @@ def make_backend(
             timeout_seconds=_optional_float(options.get("proposal_timeout_seconds")),
         )
     if name == "gemini":
-        return GeminiCliBackend()
+        return GeminiCliBackend(
+            gemini_binary=_optional_string(options.get("gemini_binary")) or "gemini",
+            model=_optional_string(options.get("model")),
+            output_format=_optional_string(options.get("output_format")) or "stream-json",
+            sandbox=options.get("sandbox"),
+            approval_mode=_optional_string(options.get("approval_mode")),
+            extra_args=[str(value) for value in options.get("extra_args", []) or []],
+            timeout_seconds=_optional_float(options.get("proposal_timeout_seconds")),
+        )
+    if name == "pi":
+        return PiCliBackend(
+            pi_binary=_optional_string(options.get("pi_binary")) or "pi",
+            model=_optional_string(options.get("model")),
+            mode=_optional_string(options.get("mode")) or "json",
+            no_session=bool(options.get("no_session", True)),
+            extra_args=[str(value) for value in options.get("extra_args", []) or []],
+            timeout_seconds=_optional_float(options.get("proposal_timeout_seconds")),
+        )
+    if name == "opencode":
+        return OpenCodeRunBackend(
+            opencode_binary=_optional_string(options.get("opencode_binary")) or "opencode",
+            model=_optional_string(options.get("model")),
+            agent=_optional_string(options.get("agent")),
+            variant=_optional_string(options.get("variant")),
+            output_format=_optional_string(options.get("output_format")) or "json",
+            extra_args=[str(value) for value in options.get("extra_args", []) or []],
+            timeout_seconds=_optional_float(options.get("proposal_timeout_seconds")),
+        )
     if name == "fake":
         if project.example_profile == "coding-tool-python-fixture":
             return _coding_tool_python_fixture_fake_backend()

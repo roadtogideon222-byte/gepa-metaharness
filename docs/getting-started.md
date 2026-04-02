@@ -7,7 +7,7 @@ It is written for newcomers first.
 
 - Python 3.11 or newer
 - [`uv`](https://docs.astral.sh/uv/)
-- optional: `codex` CLI for hosted or local Codex runs
+- optional: `codex`, `gemini`, `pi`, or `opencode` CLI for live provider runs
 - optional: Ollama with `gpt-oss:20b` or `gpt-oss:120b` for local runs
 
 ## Install
@@ -176,6 +176,72 @@ uv run metaharness run \
 
 Use `--hosted` if a project config defaults to local Ollama.
 Hosted Codex is the strongest current path for real benchmark runs in this repository.
+
+## Use Gemini CLI
+
+Requirements:
+
+- `gemini` CLI installed
+- Gemini authentication configured in your local environment
+
+<div class="command-grid" markdown="1">
+<div class="command-card" markdown="1">
+### Probe The CLI
+
+```bash
+uv run metaharness smoke gemini examples/python_fixture_benchmark --probe-only
+```
+</div>
+<div class="command-card" markdown="1">
+### Run Gemini
+
+```bash
+uv run metaharness run \
+  examples/python_fixture_benchmark \
+  --backend gemini \
+  --model gemini-2.5-pro \
+  --proposal-timeout 180 \
+  --budget 1 \
+  --run-name gemini-run
+```
+</div>
+</div>
+
+Use this path if Gemini CLI is already part of your local workflow.
+The integration is real, but the benchmark evidence in this repository is still thinner than the Codex path.
+
+## Use Pi
+
+Requirements:
+
+- `pi` CLI installed
+- Pi authentication configured for the model you want to use
+
+<div class="command-grid" markdown="1">
+<div class="command-card" markdown="1">
+### Probe The CLI
+
+```bash
+uv run metaharness smoke pi examples/python_fixture_benchmark --probe-only
+```
+</div>
+<div class="command-card" markdown="1">
+### Run Pi
+
+```bash
+uv run metaharness run \
+  examples/python_fixture_benchmark \
+  --backend pi \
+  --model anthropic/claude-sonnet-4-5 \
+  --proposal-timeout 180 \
+  --budget 1 \
+  --run-name pi-run
+```
+</div>
+</div>
+
+Pi runs through its JSON print mode and defaults to ephemeral `--no-session` behavior inside `metaharness`.
+This keeps optimization runs isolated from Pi's normal interactive session workflow.
 
 ## Use Local Codex Over Ollama
 

@@ -5,6 +5,8 @@ All recorded runs below were executed through the Codex CLI path, either with ho
 The run directories themselves are local artifacts under `examples/*/runs/` and are gitignored.
 This file is the checked-in summary of those runs.
 
+Provider smoke results that are useful for implementation status, but are not benchmark-quality comparisons yet, are listed separately at the end of this file.
+
 ## `python_fixture_benchmark`
 
 | Provider | Run ID | Best Objective | Improved | Duration (s) | Notes |
@@ -54,3 +56,46 @@ Local run directory names used for these runs:
 - On these benchmarks, hosted Codex was faster than local `gpt-oss:120b` and solved both tasks in a single proposal iteration.
 - On these same runs, local `gpt-oss:20b` hit the configured `240s` proposal timeout on both benchmarks and did not improve the baseline.
 - Reporting now filters transient workspace churn like `.venv/` and `__pycache__/` so summaries highlight actual harness edits rather than bootstrap side effects.
+
+## Provider Smoke Results
+
+These runs are useful for proving that a provider integration launches and produces inspectable artifacts.
+They should not be treated as benchmark evidence on the same level as the Codex runs above.
+
+### OpenCode
+
+| Target | Run ID | Outcome | Notes |
+| --- | --- | --- | --- |
+| `python_fixture_benchmark` | `opencode-smoke` | crash | sandboxed run failed before proposal execution because OpenCode attempted to write under `~/.local/share/opencode/` |
+| `python_fixture_benchmark` | `opencode-smoke-escalated` | no-change | OpenCode completed the run but made no edits and stayed at the baseline objective `0.050` |
+
+Important observations:
+
+- the OpenCode backend is implemented and runnable through `metaharness`
+- the first sandboxed run exposed an environment-level logging path issue
+- the successful rerun outside the sandbox completed cleanly but only performed read actions
+- stderr showed `permission requested: external_directory (/src/*); auto-rejecting`, which is the main current blocker to getting a meaningful candidate from this benchmark setup
+
+### Pi
+
+| Target | Run ID | Outcome | Notes |
+| --- | --- | --- | --- |
+| `python_fixture_benchmark` | `pi-smoke` | crash | Pi launched, but no models were configured. stderr requested provider API keys or `~/.pi/agent/models.json` |
+
+Important observations:
+
+- the Pi backend is implemented and the CLI is callable through `metaharness`
+- the current blocker is provider configuration, not parser or process integration
+- there is still no successful real Pi benchmark run recorded in this repository
+
+### Gemini
+
+| Target | Run ID | Outcome | Notes |
+| --- | --- | --- | --- |
+| `python_fixture_benchmark` | `gemini-smoke` | crash | Gemini launched, but `GEMINI_API_KEY` was not set in the environment |
+
+Important observations:
+
+- the Gemini backend is implemented and the CLI is callable through `metaharness`
+- the current blocker is provider authentication, not parser or process integration
+- there is still no successful real Gemini benchmark run recorded in this repository
