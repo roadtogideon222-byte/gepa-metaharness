@@ -1,7 +1,8 @@
 import unittest
+from pathlib import Path
 
 from metaharness.models import AgentInstructions
-from metaharness.proposer.instructions import render_backend_instructions
+from metaharness.proposer.instructions import build_backend_prompt, render_backend_instructions
 
 
 class InstructionRenderingTests(unittest.TestCase):
@@ -20,6 +21,17 @@ class InstructionRenderingTests(unittest.TestCase):
         self.assertIn("Improve latency.", text)
         self.assertIn("Keep tests passing.", text)
         self.assertIn("External evaluator decides success.", text)
+
+    def test_build_backend_prompt_embeds_bootstrap_summary(self) -> None:
+        prompt = build_backend_prompt(
+            "codex",
+            Path("/tmp/project/AGENTS.md"),
+            Path("/tmp/project"),
+            bootstrap_summary_path=Path("/tmp/project/.metaharness/bootstrap/summary.md"),
+            bootstrap_summary_text="# Environment Bootstrap\n\n- Working directory: /tmp/project",
+        )
+        self.assertIn("environment bootstrap", prompt.lower())
+        self.assertIn("Working directory: /tmp/project", prompt)
 
 
 if __name__ == "__main__":

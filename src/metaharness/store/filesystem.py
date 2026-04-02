@@ -7,6 +7,7 @@ from datetime import UTC, datetime
 from pathlib import Path
 from typing import Any
 
+from ..bootstrap import EnvironmentBootstrap
 from ..models import (
     AgentInstructions,
     CandidateRecord,
@@ -78,12 +79,19 @@ class FilesystemRunStore:
         parent: CandidateRecord,
         instructions: AgentInstructions,
         proposer_name: str,
+        bootstrap: EnvironmentBootstrap,
     ) -> ProposalRequest:
         meta_dir = candidate.workspace_dir / ".metaharness"
         meta_dir.mkdir(parents=True, exist_ok=True)
         experience_dir = meta_dir / "experience"
         experience_dir.mkdir(parents=True, exist_ok=True)
         self._copy_parent_artifacts(parent, experience_dir / "parent")
+        bootstrap_dir = meta_dir / "bootstrap"
+        bootstrap_dir.mkdir(parents=True, exist_ok=True)
+        bootstrap_summary_path = bootstrap_dir / "summary.md"
+        bootstrap_snapshot_path = bootstrap_dir / "snapshot.json"
+        bootstrap_summary_path.write_text(bootstrap.summary_text, encoding="utf-8")
+        self._write_json(bootstrap_snapshot_path, bootstrap.snapshot)
 
         parent_summary = {
             "parent_candidate_id": parent.candidate_id,
@@ -103,6 +111,8 @@ class FilesystemRunStore:
                 proposer_name=proposer_name,
                 instructions_path=instructions_path,
                 workspace_dir=candidate.workspace_dir,
+                bootstrap_summary_path=bootstrap_summary_path,
+                bootstrap_summary_text=bootstrap.summary_text,
             ),
             encoding="utf-8",
         )
@@ -113,6 +123,10 @@ class FilesystemRunStore:
             workspace_dir=candidate.workspace_dir,
             candidate_dir=candidate.candidate_dir,
             experience_dir=experience_dir,
+            bootstrap_dir=bootstrap_dir,
+            bootstrap_summary_path=bootstrap_summary_path,
+            bootstrap_snapshot_path=bootstrap_snapshot_path,
+            bootstrap_summary_text=bootstrap.summary_text,
             instructions_path=instructions_path,
             prompt_path=prompt_path,
             instructions=instructions,
@@ -143,6 +157,9 @@ class FilesystemRunStore:
                 "objective": candidate.objective,
                 "valid": candidate.valid,
                 "proposal_applied": candidate.proposal_applied,
+                "outcome": candidate.outcome,
+                "outcome_summary": candidate.outcome_summary,
+                "scope_violation_paths": candidate.scope_violation_paths,
                 "workspace_dir": str(candidate.workspace_dir),
                 "updated_at": datetime.now(UTC).isoformat(),
             },

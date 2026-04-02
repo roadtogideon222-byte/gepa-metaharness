@@ -3,7 +3,16 @@ import unittest
 from pathlib import Path
 
 from metaharness import EvaluationResult, FakeBackend, ValidationResult, optimize_harness
-from metaharness.reporting import compare_runs, summarize_project_runs, summarize_run
+from metaharness.reporting import (
+    candidate_ledger,
+    compare_runs,
+    ledger_tsv_columns,
+    render_candidate_ledger_table,
+    render_tsv,
+    summarize_project_runs,
+    summarize_run,
+    summary_tsv_columns,
+)
 
 
 class ReportingValidator:
@@ -49,6 +58,7 @@ class ReportingTests(unittest.TestCase):
             self.assertEqual(1.0, run_summary["best_objective"])
             self.assertTrue(run_summary["improved"])
             self.assertEqual("c0001", run_summary["first_improving_candidate_id"])
+            self.assertIsNotNone(run_summary["time_to_first_improvement_seconds"])
             self.assertIsNotNone(run_summary["started_at"])
             self.assertIsNotNone(run_summary["completed_at"])
 
@@ -59,6 +69,26 @@ class ReportingTests(unittest.TestCase):
             comparison = compare_runs([run_dir])
             self.assertEqual(1, len(comparison))
             self.assertEqual("demo", comparison[0]["run_id"])
+
+            ledger = candidate_ledger(run_dir)
+            self.assertEqual(2, len(ledger))
+            self.assertEqual("c0000", ledger[0]["candidate_id"])
+            self.assertEqual("c0001", ledger[1]["candidate_id"])
+            self.assertEqual("keep", ledger[1]["outcome"])
+            self.assertEqual(1, ledger[1]["changed_file_count"])
+            self.assertIn("message.txt", ledger[1]["changed_files"])
+
+            ledger_tsv = render_tsv(ledger, ledger_tsv_columns())
+            self.assertIn("candidate_id", ledger_tsv.splitlines()[0])
+            self.assertIn("c0001", ledger_tsv)
+
+            summary_tsv = render_tsv(project_summary, summary_tsv_columns())
+            self.assertIn("run_id", summary_tsv.splitlines()[0])
+            self.assertIn("demo", summary_tsv)
+
+            ledger_table = render_candidate_ledger_table(ledger)
+            self.assertIn("candidate_id", ledger_table)
+            self.assertIn("c0001", ledger_table)
 
     def test_summarize_run_filters_transient_changed_files(self) -> None:
         with tempfile.TemporaryDirectory() as tmpdir:

@@ -15,6 +15,11 @@
     "scripts/validate.sh",
     "scripts/test.sh"
   ],
+  "allowed_write_paths": [
+    "AGENTS.md",
+    "GEMINI.md",
+    "scripts"
+  ],
   "backends": {
     "codex": {
       "sandbox_mode": "workspace-write",

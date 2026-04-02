@@ -37,6 +37,10 @@ class ProposalRequest:
     workspace_dir: Path
     candidate_dir: Path
     experience_dir: Path
+    bootstrap_dir: Path
+    bootstrap_summary_path: Path
+    bootstrap_snapshot_path: Path
+    bootstrap_summary_text: str
     instructions_path: Path
     prompt_path: Path
     instructions: AgentInstructions
@@ -104,6 +108,9 @@ class CandidateRecord:
     objective: float | None = None
     valid: bool = False
     proposal_applied: bool = False
+    outcome: str = "unknown"
+    outcome_summary: str = ""
+    scope_violation_paths: list[str] = field(default_factory=list)
 
 
 @dataclass(slots=True)

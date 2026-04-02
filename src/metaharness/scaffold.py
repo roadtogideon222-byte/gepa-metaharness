@@ -55,6 +55,11 @@ def _standard_scaffold_files() -> dict[str, str]:
                 "scripts/validate.sh",
                 "scripts/test.sh"
               ],
+              "allowed_write_paths": [
+                "AGENTS.md",
+                "GEMINI.md",
+                "scripts"
+              ],
               "backends": {
                 "codex": {
                   "sandbox_mode": "workspace-write",
@@ -186,6 +191,11 @@ def _local_oss_smoke_scaffold_files() -> dict[str, str]:
                 "GEMINI.md",
                 "scripts/validate.sh"
               ],
+              "allowed_write_paths": [
+                "AGENTS.md",
+                "GEMINI.md",
+                "scripts"
+              ],
               "backends": {
                 "codex": {
                   "sandbox_mode": "workspace-write",
@@ -278,6 +288,11 @@ def _local_oss_medium_scaffold_files() -> dict[str, str]:
                 "scripts/bootstrap.sh",
                 "scripts/validate.sh",
                 "scripts/test.sh"
+              ],
+              "allowed_write_paths": [
+                "AGENTS.md",
+                "GEMINI.md",
+                "scripts"
               ],
               "backends": {
                 "codex": {
@@ -398,7 +413,7 @@ def _shared_readme(profile_name: str, run_codex_command: str, extra_guidance: st
 
         To adapt this scaffold to your real workflow:
 
-        - edit `metaharness.json` to define the objective, constraints, and required files
+        - edit `metaharness.json` to define the objective, constraints, required files, and `allowed_write_paths`
         {extra_guidance}
         - replace `tasks.json` with deterministic `file_phrase` and `command` checks that match your workflow
         - expand `baseline/AGENTS.md`, `baseline/GEMINI.md`, and `baseline/scripts/`

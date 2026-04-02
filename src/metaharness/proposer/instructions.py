@@ -93,7 +93,14 @@ def render_generic_instructions(instructions: AgentInstructions) -> str:
     return render_codex_instructions(instructions)
 
 
-def build_backend_prompt(proposer_name: str, instructions_path: Path, workspace_dir: Path) -> str:
+def build_backend_prompt(
+    proposer_name: str,
+    instructions_path: Path,
+    workspace_dir: Path,
+    *,
+    bootstrap_summary_path: Path | None = None,
+    bootstrap_summary_text: str = "",
+) -> str:
     prompt = [
         f"You are optimizing a harness candidate inside {workspace_dir}.",
         f"Read the instructions in {instructions_path}.",
@@ -101,8 +108,14 @@ def build_backend_prompt(proposer_name: str, instructions_path: Path, workspace_
         "Inspect the current workspace, make targeted improvements, and stop when your edits are complete.",
         "Do not claim success without making concrete changes.",
     ]
+    if bootstrap_summary_path is not None:
+        prompt.append(
+            f"Use the environment bootstrap in {bootstrap_summary_path} before spending turns on basic workspace discovery."
+        )
     if proposer_name == "codex":
         prompt.append("Follow the instructions file carefully before editing.")
     if proposer_name == "gemini":
         prompt.append("Use the project context file before proposing changes.")
+    if bootstrap_summary_text.strip():
+        prompt.extend(["", "Environment bootstrap:", "", bootstrap_summary_text.strip()])
     return "\n".join(prompt)

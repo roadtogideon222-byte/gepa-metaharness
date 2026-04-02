@@ -1,6 +1,6 @@
 # Benchmark Results
 
-As of April 1, 2026, these are the real provider runs captured in this repository.
+These are the real provider runs currently captured in this repository.
 
 ## `python_fixture_benchmark`
 

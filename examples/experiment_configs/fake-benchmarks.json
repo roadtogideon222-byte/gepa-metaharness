@@ -1,0 +1,13 @@
+{
+  "project_dirs": [
+    "../python_fixture_benchmark",
+    "../python_cli_benchmark"
+  ],
+  "backends": [
+    "fake"
+  ],
+  "budgets": [
+    1
+  ],
+  "trial_count": 2
+}

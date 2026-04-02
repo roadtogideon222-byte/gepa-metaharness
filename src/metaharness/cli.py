@@ -5,10 +5,28 @@ import json
 from pathlib import Path
 from typing import Any
 
+from .experiments import (
+    aggregate_tsv_columns,
+    default_experiment_dir,
+    render_experiment_aggregate_table,
+    run_experiment_matrix,
+)
+from .experiment_config import load_experiment_spec, resolve_experiment_inputs
 from .integrations.coding_tool.config import load_coding_tool_project
 from .integrations.coding_tool.runtime import resolve_backend_options, run_coding_tool_project
 from .proposer.codex_exec import probe_codex_cli, probe_ollama_server
-from .reporting import compare_runs, render_comparison_table, render_run_summary, summarize_project_runs, summarize_run
+from .reporting import (
+    candidate_ledger,
+    compare_runs,
+    ledger_tsv_columns,
+    render_candidate_ledger_table,
+    render_comparison_table,
+    render_run_summary,
+    render_tsv,
+    summarize_project_runs,
+    summarize_run,
+    summary_tsv_columns,
+)
 from .scaffold import create_coding_tool_scaffold
 
 
@@ -36,6 +54,21 @@ def main(argv: list[str] | None = None) -> int:
     run_parser.add_argument("--model", default=None)
     run_parser.add_argument("--proposal-timeout", type=float, default=None)
 
+    experiment_parser = subparsers.add_parser("experiment", help="Run a benchmark x backend x budget x trial matrix.")
+    experiment_parser.add_argument("project_dirs", nargs="*")
+    experiment_parser.add_argument("--config", default=None)
+    experiment_parser.add_argument("--backend", action="append", choices=["fake", "codex", "gemini"])
+    experiment_parser.add_argument("--budget", action="append", type=int, dest="budgets")
+    experiment_parser.add_argument("--trials", type=int, default=None)
+    experiment_parser.add_argument("--model", action="append", dest="models")
+    experiment_parser.add_argument("--results-dir", default=None)
+    experiment_parser.add_argument("--json", action="store_true", dest="json_output")
+    experiment_parser.add_argument("--tsv", action="store_true", dest="tsv_output")
+    experiment_parser.add_argument("--hosted", action="store_true")
+    experiment_parser.add_argument("--oss", action="store_true")
+    experiment_parser.add_argument("--local-provider", choices=["ollama", "lmstudio"], default=None)
+    experiment_parser.add_argument("--proposal-timeout", type=float, default=None)
+
     smoke_parser = subparsers.add_parser("smoke", help="Run a backend smoke check.")
     smoke_subparsers = smoke_parser.add_subparsers(dest="smoke_backend", required=True)
 
@@ -54,13 +87,20 @@ def main(argv: list[str] | None = None) -> int:
     inspect_parser.add_argument("run_dir")
     inspect_parser.add_argument("--json", action="store_true", dest="json_output")
 
+    ledger_parser = subparsers.add_parser("ledger", help="Export the candidate ledger for one run.")
+    ledger_parser.add_argument("run_dir")
+    ledger_parser.add_argument("--json", action="store_true", dest="json_output")
+    ledger_parser.add_argument("--tsv", action="store_true", dest="tsv_output")
+
     summarize_parser = subparsers.add_parser("summarize", help="Summarize all runs in a project.")
     summarize_parser.add_argument("project_dir")
     summarize_parser.add_argument("--json", action="store_true", dest="json_output")
+    summarize_parser.add_argument("--tsv", action="store_true", dest="tsv_output")
 
     compare_parser = subparsers.add_parser("compare", help="Compare one or more run directories.")
     compare_parser.add_argument("run_dirs", nargs="+")
     compare_parser.add_argument("--json", action="store_true", dest="json_output")
+    compare_parser.add_argument("--tsv", action="store_true", dest="tsv_output")
 
     args = parser.parse_args(argv)
 
@@ -74,6 +114,19 @@ def main(argv: list[str] | None = None) -> int:
             run_name=args.run_name,
             backend_overrides=_backend_overrides_from_args(args),
         )
+    if args.command == "experiment":
+        return _cmd_experiment(
+            project_dirs=[Path(value) for value in args.project_dirs],
+            config_path=Path(args.config) if args.config else None,
+            backends=args.backend,
+            budgets=args.budgets,
+            trial_count=args.trials,
+            models=args.models,
+            results_dir=Path(args.results_dir) if args.results_dir else None,
+            json_output=args.json_output,
+            tsv_output=args.tsv_output,
+            backend_overrides=_backend_overrides_from_args(args),
+        )
     if args.command == "smoke":
         if args.smoke_backend == "codex":
             return _cmd_smoke_codex(
@@ -85,10 +138,12 @@ def main(argv: list[str] | None = None) -> int:
             )
     if args.command == "inspect":
         return _cmd_inspect(Path(args.run_dir), args.json_output)
+    if args.command == "ledger":
+        return _cmd_ledger(Path(args.run_dir), args.json_output, args.tsv_output)
     if args.command == "summarize":
-        return _cmd_summarize(Path(args.project_dir), args.json_output)
+        return _cmd_summarize(Path(args.project_dir), args.json_output, args.tsv_output)
     if args.command == "compare":
-        return _cmd_compare([Path(value) for value in args.run_dirs], args.json_output)
+        return _cmd_compare([Path(value) for value in args.run_dirs], args.json_output, args.tsv_output)
     raise RuntimeError(f"unknown command: {args.command}")
 
 
@@ -121,6 +176,60 @@ def _cmd_run(
     print(f"best_candidate_id={result.best_candidate_id}")
     print(f"best_objective={result.best_objective:.3f}")
     print(f"best_workspace_dir={result.best_workspace_dir}")
+    return 0
+
+
+def _cmd_experiment(
+    project_dirs: list[Path],
+    config_path: Path | None,
+    backends: list[str] | None,
+    budgets: list[int] | None,
+    trial_count: int | None,
+    models: list[str] | None,
+    results_dir: Path | None,
+    json_output: bool,
+    tsv_output: bool,
+    backend_overrides: dict[str, Any] | None,
+) -> int:
+    spec = load_experiment_spec(config_path) if config_path is not None else None
+    resolved = resolve_experiment_inputs(
+        spec=spec,
+        cli_project_dirs=project_dirs,
+        cli_backends=backends,
+        cli_budgets=budgets,
+        cli_trial_count=trial_count,
+        cli_models=models,
+        cli_results_dir=results_dir,
+        cli_backend_overrides=backend_overrides,
+    )
+
+    if resolved["trial_count"] < 1:
+        raise SystemExit("--trials must be at least 1")
+    resolved_results_dir = resolved["results_dir"] or default_experiment_dir(resolved["project_dirs"][0])
+    payload = run_experiment_matrix(
+        project_dirs=resolved["project_dirs"],
+        backends=resolved["backends"],
+        budgets=resolved["budgets"],
+        trial_count=resolved["trial_count"],
+        models=resolved["models"],
+        results_dir=resolved_results_dir,
+        backend_overrides=resolved["backend_overrides"],
+        config_path=resolved["config_path"],
+        config_payload=resolved["config_payload"],
+    )
+    output_mode = _output_mode(json_output, tsv_output)
+    if output_mode == "json":
+        print(json.dumps(payload, indent=2, sort_keys=True))
+        return 0
+    if output_mode == "tsv":
+        print(render_tsv(payload["aggregates"], aggregate_tsv_columns()))
+        return 0
+
+    print(f"experiment_dir={payload['experiment_dir']}")
+    print(f"trial_count={len(payload['trials'])}")
+    print(f"aggregate_count={len(payload['aggregates'])}")
+    print()
+    print(render_experiment_aggregate_table(payload["aggregates"]))
     return 0
 
 
@@ -196,25 +305,50 @@ def _cmd_inspect(run_dir: Path, json_output: bool) -> int:
     for candidate in data["candidates"]:
         print(
             f"  {candidate['candidate_id']}: objective={candidate['objective']} "
-            f"valid={candidate['valid']} proposal_applied={candidate['proposal_applied']}"
+            f"valid={candidate['valid']} proposal_applied={candidate['proposal_applied']} "
+            f"outcome={candidate.get('outcome', 'unknown')}"
         )
+        if candidate.get("scope_violation_paths"):
+            print(f"    scope_violation_paths={','.join(candidate['scope_violation_paths'])}")
     return 0
 
 
-def _cmd_summarize(project_dir: Path, json_output: bool) -> int:
-    data = summarize_project_runs(project_dir)
-    if json_output:
+def _cmd_ledger(run_dir: Path, json_output: bool, tsv_output: bool) -> int:
+    data = candidate_ledger(run_dir)
+    output_mode = _output_mode(json_output, tsv_output)
+    if output_mode == "json":
         print(json.dumps(data, indent=2, sort_keys=True))
+        return 0
+    if output_mode == "tsv":
+        print(render_tsv(data, ledger_tsv_columns()))
+        return 0
+
+    print(render_candidate_ledger_table(data))
+    return 0
+
+
+def _cmd_summarize(project_dir: Path, json_output: bool, tsv_output: bool) -> int:
+    data = summarize_project_runs(project_dir)
+    output_mode = _output_mode(json_output, tsv_output)
+    if output_mode == "json":
+        print(json.dumps(data, indent=2, sort_keys=True))
+        return 0
+    if output_mode == "tsv":
+        print(render_tsv(data, summary_tsv_columns()))
         return 0
 
     print(render_comparison_table(data))
     return 0
 
 
-def _cmd_compare(run_dirs: list[Path], json_output: bool) -> int:
+def _cmd_compare(run_dirs: list[Path], json_output: bool, tsv_output: bool) -> int:
     data = compare_runs(run_dirs)
-    if json_output:
+    output_mode = _output_mode(json_output, tsv_output)
+    if output_mode == "json":
         print(json.dumps(data, indent=2, sort_keys=True))
+        return 0
+    if output_mode == "tsv":
+        print(render_tsv(data, summary_tsv_columns()))
         return 0
 
     print(render_comparison_table(data))
@@ -287,6 +421,16 @@ def _backend_overrides_from_args(args: argparse.Namespace) -> dict[str, Any] | N
     }
     filtered = {key: value for key, value in overrides.items() if value is not None}
     return filtered or None
+
+
+def _output_mode(json_output: bool, tsv_output: bool) -> str:
+    if json_output and tsv_output:
+        raise SystemExit("--json cannot be combined with --tsv")
+    if json_output:
+        return "json"
+    if tsv_output:
+        return "tsv"
+    return "text"
 
 
 if __name__ == "__main__":

@@ -39,6 +39,7 @@ class CodingToolConfigTests(unittest.TestCase):
             self.assertEqual("ollama", backend.local_provider)
             self.assertEqual("gpt-oss:20b", backend.model)
             self.assertIsNone(backend.timeout_seconds)
+            self.assertEqual([], project.allowed_write_paths)
 
     def test_make_backend_can_override_local_codex_config_to_hosted(self) -> None:
         with tempfile.TemporaryDirectory() as tmpdir:
@@ -75,6 +76,27 @@ class CodingToolConfigTests(unittest.TestCase):
             self.assertFalse(backend.use_oss)
             self.assertIsNone(backend.local_provider)
             self.assertIsNone(backend.model)
+
+    def test_load_project_reads_allowed_write_paths(self) -> None:
+        with tempfile.TemporaryDirectory() as tmpdir:
+            root = Path(tmpdir)
+            (root / "baseline").mkdir()
+            (root / "tasks.json").write_text("[]", encoding="utf-8")
+            (root / "metaharness.json").write_text(
+                """
+                {
+                  "objective": "demo",
+                  "constraints": [],
+                  "required_files": [],
+                  "allowed_write_paths": ["AGENTS.md", "scripts"],
+                  "backends": {}
+                }
+                """.strip(),
+                encoding="utf-8",
+            )
+
+            project = load_coding_tool_project(root)
+            self.assertEqual(["AGENTS.md", "scripts"], project.allowed_write_paths)
 
 
 if __name__ == "__main__":

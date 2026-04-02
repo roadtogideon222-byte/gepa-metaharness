@@ -31,6 +31,12 @@ classifiers = [
 keywords = ["agents", "benchmarking", "codex", "evaluation", "harness", "optimization"]
 dependencies = []
 
+[project.urls]
+Homepage = "https://github.com/SuperagenticAI/metaharness"
+Documentation = "https://superagenticai.github.io/metaharness/"
+Repository = "https://github.com/SuperagenticAI/metaharness"
+Issues = "https://github.com/SuperagenticAI/metaharness/issues"
+
 [dependency-groups]
 dev = [
   "mkdocs>=1.6,<2",

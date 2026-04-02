@@ -2,7 +2,7 @@
 
 This page records the experiments completed so far during development.
 
-All dates below refer to April 1, 2026.
+For repeated benchmark runs, use `metaharness experiment` so the results are saved as both JSON and TSV.
 
 ## Early Scaffold Experiments
 

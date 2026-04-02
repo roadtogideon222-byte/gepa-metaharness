@@ -23,6 +23,7 @@ def optimize_harness(
     objective: str,
     validator: ValidatorProtocol | None = None,
     constraints: Sequence[str] | None = None,
+    allowed_write_paths: Sequence[str] | None = None,
 ) -> OptimizeResult:
     engine = MetaHarnessEngine(
         baseline=Path(baseline),
@@ -33,5 +34,6 @@ def optimize_harness(
         budget=budget,
         objective=objective,
         constraints=list(constraints or []),
+        allowed_write_paths=list(allowed_write_paths or []),
     )
     return engine.run()

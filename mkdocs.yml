@@ -1,5 +1,9 @@
 site_name: metaharness
 site_description: Filesystem first harness optimization for agentic coding systems and coding tool users.
+site_url: !ENV [MKDOCS_SITE_URL, "https://superagenticai.github.io/metaharness/"]
+repo_url: https://github.com/SuperagenticAI/metaharness
+repo_name: SuperagenticAI/metaharness
+edit_uri: edit/main/docs/
 theme:
   name: material
   palette:
@@ -9,10 +13,14 @@ theme:
   features:
     - navigation.sections
     - navigation.top
+    - content.action.edit
+    - content.action.view
     - content.code.copy
     - search.suggest
     - search.highlight
   font: false
+  icon:
+    repo: fontawesome/brands/github
 markdown_extensions:
   - admonition
   - attr_list

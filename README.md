@@ -1,80 +1,132 @@
 # metaharness
 
+[![CI](https://github.com/SuperagenticAI/metaharness/actions/workflows/ci.yml/badge.svg)](https://github.com/SuperagenticAI/metaharness/actions/workflows/ci.yml)
+[![Docs](https://github.com/SuperagenticAI/metaharness/actions/workflows/pages.yml/badge.svg)](https://github.com/SuperagenticAI/metaharness/actions/workflows/pages.yml)
+[![Documentation](https://img.shields.io/badge/docs-GitHub%20Pages-111111?logo=github&logoColor=white)](https://superagenticai.github.io/metaharness/)
+
 `metaharness` is an open source Python library for optimizing executable harnesses around agentic coding systems.
 
-It is built for two audiences:
+It is built for teams who want to improve the code and files around an agent workflow, not just the prompt.
+That includes instruction files, setup flows, validation scripts, test scripts, routing logic, and other executable support code.
 
-- developers building agentic coding systems who want to improve harness code, workflow scripts, routing logic, or evaluation flows
-- practitioners using coding-agent tools who want to improve `AGENTS.md`, `GEMINI.md`, setup scripts, validation scripts, and acceptance tests
+## Why `metaharness`
 
-The core idea is simple:
+Many agent failures come from the harness around the model:
 
-1. start from a baseline harness
-2. let a coding agent propose changes
+- weak repository instructions
+- missing setup steps
+- broken validation logic
+- incomplete test flows
+- poor iteration memory
+- acceptance checks that do not match the real task
+
+`metaharness` turns those artifacts into a repeatable optimization target with stored evidence for every proposal.
+It also captures a compact environment snapshot before each proposal so agents do not waste early turns on basic workspace discovery.
+Projects can also declare an allowed write scope so off-target edits are rejected automatically.
+
+## How It Works
+
+`metaharness` runs an outer optimization loop around a harness:
+
+1. start from a baseline workspace
+2. ask a coding agent to improve it
 3. validate and evaluate the result
 4. keep the best candidate
 5. store all artifacts on disk
 
-This makes the optimization process inspectable, reproducible, and usable in real engineering workflows.
+The result is a practical, inspectable workflow for improving real harnesses instead of ad hoc prompt tinkering.
 
-## Why This Project Exists
+## Who It Is For
 
-Most real failures in agent workflows are not just model failures.
-They come from the harness around the model:
+- developers building agentic coding systems who want to optimize harness code, workflow scripts, retrieval wrappers, routing, and evaluation flows
+- practitioners using coding-agent tools who want to improve `AGENTS.md`, `GEMINI.md`, bootstrap scripts, validation scripts, and acceptance tests
 
-- weak repository instructions
-- missing setup steps
-- brittle validation scripts
-- poor context handoff between iterations
-- acceptance tests that do not match the real task
+## Quickstart
 
-`metaharness` turns those harness artifacts into an optimization target.
+Install the project:
 
-## What You Can Optimize
+```bash
+uv sync
+```
 
-`metaharness` is useful when the thing under optimization is executable and file-based, such as:
+Run the fake backend on a real benchmark:
 
-- `AGENTS.md`
-- `GEMINI.md`
-- bootstrap scripts
-- validation scripts
-- test scripts
-- routing or workflow glue code
-- benchmark harness logic
+```bash
+uv run metaharness run examples/python_fixture_benchmark --backend fake --budget 1 --run-name quickstart
+```
 
-## What You Get
+Inspect the run:
+
+```bash
+uv run metaharness inspect examples/python_fixture_benchmark/runs/quickstart
+```
+
+Export the candidate ledger:
+
+```bash
+uv run metaharness ledger examples/python_fixture_benchmark/runs/quickstart --tsv
+```
+
+Run a saved experiment matrix:
+
+```bash
+uv run metaharness experiment --config examples/experiment_configs/fake-benchmarks.json
+```
+
+## Core Capabilities
 
 - a minimal optimization engine
 - a filesystem-backed run store
+- automatic environment bootstrap snapshots for each proposal
+- optional write-scope enforcement through `allowed_write_paths`
 - a provider-neutral proposer backend interface
 - a real `CodexExecBackend`
 - a deterministic `FakeBackend`
 - a coding-tool integration for instruction files and script-based harnesses
-- benchmark targets and experiment reports
-- CLI commands for `scaffold`, `run`, `smoke`, `inspect`, `summarize`, and `compare`
+- explicit per-candidate outcomes: `keep`, `discard`, `crash`, `timeout`, `no-change`, and `scope-violation`
+- reporting commands for `inspect`, `ledger`, `summarize`, and `compare`
+- experiment-matrix execution with JSON and TSV outputs
+- benchmark targets and experiment records
 
 ## Current Status
 
-This repository now includes:
+The repository currently includes:
 
 - two real coding-tool benchmark targets
 - a smaller deterministic ticket-router example
 - hosted Codex runs on the real benchmarks
 - local Codex over Ollama runs with `gpt-oss:20b` and `gpt-oss:120b`
-- reporting that highlights actual harness edits instead of transient `.venv` churn
+- a docs site published from GitHub Actions
 
-As of April 1, 2026:
+Current recorded experiments in this repository show:
 
-- hosted Codex solved both real benchmarks in one proposal iteration
-- local `gpt-oss:120b` solved `python_fixture_benchmark`
-- local `gpt-oss:20b` timed out on both real benchmark runs at the configured `240s`
+- hosted Codex solves both real benchmarks in one proposal iteration
+- local `gpt-oss:120b` solves `python_fixture_benchmark`
+- local `gpt-oss:20b` is useful for smoke checks but timed out on the current real benchmark runs
 
-Detailed experiment records are in:
+Detailed experiment records:
 
-- [BENCHMARK_RESULTS.md](BENCHMARK_RESULTS.md)
-- [docs/experiments.md](docs/experiments.md)
+- [Benchmark overview](BENCHMARKS.md)
+- [Recorded benchmark results](BENCHMARK_RESULTS.md)
+- [Experiment notes](docs/experiments.md)
 
-## Install
+## Provider Status
+
+- hosted Codex is the strongest current path for real runs
+- local Codex over Ollama works and has been exercised with `gpt-oss:20b` and `gpt-oss:120b`
+- Gemini exists as a scaffolded backend and is not yet at parity with Codex
+
+## Documentation
+
+- [Project documentation](https://superagenticai.github.io/metaharness/)
+- [Getting started](https://superagenticai.github.io/metaharness/getting-started/)
+- [Architecture](https://superagenticai.github.io/metaharness/architecture/)
+- [Providers](https://superagenticai.github.io/metaharness/providers/)
+- [Benchmarks](https://superagenticai.github.io/metaharness/benchmarks/)
+- [CLI reference](https://superagenticai.github.io/metaharness/cli-reference/)
+- [Experiments](https://superagenticai.github.io/metaharness/experiments/)
+
+## Installation
 
 Project setup:
 
@@ -82,7 +134,7 @@ Project setup:
 uv sync
 ```
 
-If you want to build the docs site too:
+If you want the docs toolchain too:
 
 ```bash
 uv sync --group dev
@@ -94,41 +146,21 @@ Check the CLI:
 uv run metaharness --help
 ```
 
-Alternative editable install:
+Editable install with `pip` also works:
 
 ```bash
 pip install -e .
 ```
 
-## Quick Start
-
-Run the fake backend on a real benchmark:
-
-```bash
-uv run metaharness run examples/python_fixture_benchmark --backend fake --budget 1 --run-name quickstart
-```
-
-Inspect the result:
-
-```bash
-uv run metaharness inspect examples/python_fixture_benchmark/runs/quickstart
-```
-
-Summarize all runs for that benchmark:
-
-```bash
-uv run metaharness summarize examples/python_fixture_benchmark
-```
-
-## Use Hosted Codex
+## Hosted Codex
 
 Requirements:
 
 - `codex` CLI installed
 - authenticated Codex session or API key
-- network access
+- outbound network access
 
-Run a real benchmark:
+Run a real benchmark with hosted Codex:
 
 ```bash
 uv run metaharness run examples/python_fixture_benchmark --backend codex --hosted --budget 1 --run-name hosted-codex
@@ -136,10 +168,10 @@ uv run metaharness run examples/python_fixture_benchmark --backend codex --hoste
 
 Important:
 
-- use `--hosted` when a benchmark config defaults to local Ollama
-- there is no product blocker in `metaharness` for hosted Codex now
+- use `--hosted` when a project config defaults to local Ollama
+- the library is ready for hosted Codex runs today
 
-## Use Local Codex Over Ollama
+## Local Codex Over Ollama
 
 Probe the local setup:
 
@@ -161,39 +193,30 @@ uv run metaharness run examples/python_fixture_benchmark --backend codex --oss -
 
 ## Benchmarks And Examples
 
-### Real Benchmarks
+Real benchmarks:
 
 - [examples/python_fixture_benchmark](examples/python_fixture_benchmark)
 - [examples/python_cli_benchmark](examples/python_cli_benchmark)
 
-These are small, real, and executable.
-They use:
-
-- real fixture repositories
-- real shell scripts
-- deterministic task scoring
-- instruction-file checks
-- stored run artifacts
-
-### Deterministic Example
+Smaller deterministic example:
 
 - [examples/ticket_router](examples/ticket_router)
 
-Run it:
+Run the ticket router example:
 
 ```bash
 uv run python examples/ticket_router/run.py --backend fake --budget 1
 ```
 
-## Create Your Own Project
+## Scaffold Your Own Project
 
-Scaffold a coding-tool project:
+Create a coding-tool project:
 
 ```bash
 uv run metaharness scaffold coding-tool ./my-coding-tool-optimizer
 ```
 
-Useful scaffold profiles:
+Available profiles:
 
 - `standard`
 - `local-oss-smoke`
@@ -205,7 +228,7 @@ Run the scaffold with the fake backend:
 uv run metaharness run ./my-coding-tool-optimizer --backend fake --budget 1
 ```
 
-## CLI Commands
+## CLI Overview
 
 Create a scaffold:
 
@@ -225,19 +248,13 @@ Probe Codex:
 uv run metaharness smoke codex ./my-project --probe-only
 ```
 
-Inspect one run:
+Inspect a run:
 
 ```bash
 uv run metaharness inspect ./my-project/runs/example
 ```
 
-Summarize project runs:
-
-```bash
-uv run metaharness summarize ./examples/python_fixture_benchmark
-```
-
-Compare specific runs:
+Compare runs:
 
 ```bash
 uv run metaharness compare \
@@ -246,52 +263,44 @@ uv run metaharness compare \
   ./examples/python_fixture_benchmark/runs/ollama-120b-20260401
 ```
 
-## Why Filesystem First Matters
+Run an experiment matrix:
 
-`metaharness` stores every important artifact on disk:
+```bash
+uv run metaharness experiment --config examples/experiment_configs/fake-benchmarks.json
+```
+
+## Benefits Of The Filesystem Approach
+
+Every run stores:
 
 - prompts
 - candidate workspaces
-- validation output
-- evaluation output
+- validation results
+- evaluation results
 - proposal metadata
 - workspace diffs
 - per-candidate manifests
 
-That makes the optimization history reviewable and reusable.
+That makes the optimization history reviewable, debuggable, and reusable.
 
-## Documentation
+## Development
 
-Project docs:
-
-- [docs/index.md](docs/index.md)
-- [docs/getting-started.md](docs/getting-started.md)
-- [docs/architecture.md](docs/architecture.md)
-- [docs/providers.md](docs/providers.md)
-- [docs/benchmarks.md](docs/benchmarks.md)
-- [docs/cli-reference.md](docs/cli-reference.md)
-- [docs/experiments.md](docs/experiments.md)
-
-Docs site commands:
+Compile checks:
 
 ```bash
-uv sync --group dev
-uv run mkdocs serve
-uv run mkdocs build --strict
-```
-
-## Development Checks
-
-Compile:
-
-```bash
-uv run python -m py_compile $(find src tests examples -name '*.py' | sort)
+uv run python -m compileall -q src tests examples docs
 ```
 
 Unit tests:
 
 ```bash
 uv run python -m unittest discover -s tests -v
+```
+
+Docs build:
+
+```bash
+uv run mkdocs build --strict
 ```
 
 Fake benchmark smoke runs:

@@ -25,6 +25,10 @@
     <strong>Filesystem run artifacts</strong>
     Every run stores prompts, results, diffs, evaluation output, and candidate manifests on disk.
   </div>
+  <div class="stat-card">
+    <strong>Experiment runner included</strong>
+    Batch runs, ledgers, and TSV exports are built into the CLI.
+  </div>
 </div>
 
 ## What This Project Is
@@ -60,16 +64,20 @@ Typical failure points include:
 
 `metaharness` helps by turning those artifacts into a repeatable optimization target with stored evidence.
 
+It also captures a compact environment snapshot before each proposal and supports write-scope enforcement so candidate edits can be constrained to the files that actually matter.
+
 ## What You Get
 
 - a minimal optimization engine
 - a filesystem-backed run store
+- automatic environment bootstrap snapshots
+- write-scope enforcement through `allowed_write_paths`
 - a provider-neutral proposer backend interface
 - a real `CodexExecBackend`
 - a `FakeBackend` for deterministic tests and smoke runs
 - a coding-tool integration for optimizing instruction files and scripts
 - benchmark targets and experiment tracking
-- CLI commands for `run`, `smoke`, `inspect`, `summarize`, and `compare`
+- CLI commands for `run`, `experiment`, `smoke`, `inspect`, `ledger`, `summarize`, and `compare`
 
 ## Current Benchmarks
 
@@ -81,8 +89,6 @@ The two Python benchmarks are the main OSS examples today.
 They use real shell scripts and real fixture repositories, not placeholder text-only checks.
 
 ## Experiment Snapshot
-
-As of April 1, 2026:
 
 - hosted Codex solved both real benchmarks in one proposal iteration
 - local `gpt-oss:120b` over Ollama solved `python_fixture_benchmark`
@@ -97,3 +103,4 @@ See [Experiments](experiments.md) for the full tables and notes.
 - [Providers](providers.md)
 - [Benchmarks](benchmarks.md)
 - [CLI Reference](cli-reference.md)
+- [Experiments](experiments.md)

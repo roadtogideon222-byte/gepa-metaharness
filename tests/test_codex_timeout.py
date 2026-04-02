@@ -53,10 +53,14 @@ class CodexTimeoutTests(unittest.TestCase):
             proposal = json.loads(
                 (run_dir / "candidates" / "c0001" / "proposal" / "result.json").read_text(encoding="utf-8")
             )
+            manifest = json.loads(
+                (run_dir / "candidates" / "c0001" / "manifest.json").read_text(encoding="utf-8")
+            )
             self.assertFalse(proposal["applied"])
             self.assertTrue(proposal["metadata"]["timed_out"])
             self.assertEqual(124, proposal["metadata"]["returncode"])
             self.assertIn("timed out", proposal["summary"])
+            self.assertEqual("timeout", manifest["outcome"])
 
 
 if __name__ == "__main__":

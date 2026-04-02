@@ -11,6 +11,8 @@ Current status:
 - `FakeBackend` is deterministic and used for tests and smoke runs
 - `GeminiCliBackend` exists as a scaffold and is not yet at parity with Codex
 
+The current package is Codex-first with an extensible backend interface.
+
 ## Hosted Codex
 
 Hosted Codex is supported today.
@@ -34,8 +36,8 @@ Why `--hosted` matters:
 
 Current conclusion:
 
-- there is no product blocker for hosted Codex in `metaharness`
-- the remaining requirement is simply environment access and authentication
+- hosted Codex is supported in the library today
+- the remaining requirement is environment access and authentication
 
 ## Local Codex Over Ollama
 
@@ -58,7 +60,7 @@ uv run metaharness run examples/python_fixture_benchmark --backend codex --oss -
 
 ## Current Provider Takeaways
 
-Based on real benchmark runs on April 1, 2026:
+Based on the recorded benchmark runs in this repository:
 
 | Provider | Benchmark Result | Observed Pattern |
 | --- | --- | --- |

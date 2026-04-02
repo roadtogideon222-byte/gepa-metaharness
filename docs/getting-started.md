@@ -55,6 +55,12 @@ Summarize all runs for a project:
 uv run metaharness summarize examples/python_fixture_benchmark
 ```
 
+Export the candidate ledger for one run:
+
+```bash
+uv run metaharness ledger examples/python_fixture_benchmark/runs/first-run --tsv
+```
+
 Compare specific runs:
 
 ```bash
@@ -62,6 +68,12 @@ uv run metaharness compare \
   examples/python_fixture_benchmark/runs/hosted-codex-20260401 \
   examples/python_fixture_benchmark/runs/ollama-20b-20260401 \
   examples/python_fixture_benchmark/runs/ollama-120b-20260401
+```
+
+Run a saved experiment matrix:
+
+```bash
+uv run metaharness experiment --config examples/experiment_configs/fake-benchmarks.json
 ```
 
 ## Use Hosted Codex
@@ -81,7 +93,7 @@ uv run metaharness run examples/python_fixture_benchmark --backend codex --hoste
 Important:
 
 - use `--hosted` if a project config defaults to local Ollama
-- there is no `metaharness` blocker for hosted Codex at this point
+- hosted Codex is the strongest current path for real benchmark runs in this repository
 
 ## Use Local Codex Over Ollama
 
@@ -126,6 +138,12 @@ Medium local profile:
 
 ```bash
 uv run metaharness scaffold coding-tool ./my-local-oss-medium --profile local-oss-medium
+```
+
+If you want a checked-in experiment workflow for your own project, add a small JSON spec and run it with:
+
+```bash
+uv run metaharness experiment --config ./my-experiment.json
 ```
 
 ## Build The Docs

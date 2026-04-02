@@ -194,6 +194,7 @@ def run_coding_tool_project(
         budget=budget if budget is not None else project.default_budget,
         objective=project.objective,
         constraints=project.constraints,
+        allowed_write_paths=project.allowed_write_paths,
     )
 
 

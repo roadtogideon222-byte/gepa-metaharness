@@ -1,5 +1,6 @@
 import tempfile
 import unittest
+import json
 from pathlib import Path
 
 from metaharness import EvaluationResult, FakeBackend, ValidationResult, optimize_harness
@@ -51,6 +52,31 @@ class EngineTests(unittest.TestCase):
             self.assertEqual(1.0, result.best_objective)
             self.assertTrue((run_dir / "indexes" / "leaderboard.json").exists())
             self.assertTrue((run_dir / "candidates" / "c0001" / "proposal" / "workspace.diff").exists())
+            bootstrap_summary = (
+                run_dir
+                / "candidates"
+                / "c0001"
+                / "workspace"
+                / ".metaharness"
+                / "bootstrap"
+                / "summary.md"
+            )
+            bootstrap_snapshot = (
+                run_dir
+                / "candidates"
+                / "c0001"
+                / "workspace"
+                / ".metaharness"
+                / "bootstrap"
+                / "snapshot.json"
+            )
+            prompt_path = run_dir / "candidates" / "c0001" / "proposal" / "prompt.txt"
+            self.assertTrue(bootstrap_summary.exists())
+            self.assertTrue(bootstrap_snapshot.exists())
+            self.assertIn("Environment Bootstrap", bootstrap_summary.read_text(encoding="utf-8"))
+            self.assertIn("Working directory", prompt_path.read_text(encoding="utf-8"))
+            manifest = json.loads((run_dir / "candidates" / "c0001" / "manifest.json").read_text(encoding="utf-8"))
+            self.assertEqual("keep", manifest["outcome"])
             self.assertEqual("this is better\n", (result.best_workspace_dir / "message.txt").read_text(encoding="utf-8"))
 
 

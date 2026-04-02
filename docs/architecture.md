@@ -24,7 +24,7 @@ Key file:
 
 ### Run Store
 
-The filesystem run store creates candidate workspaces, writes manifests, stores proposal output, and records diffs.
+The filesystem run store creates candidate workspaces, captures a compact environment bootstrap, enforces any configured write-scope allowlist, writes manifests, stores proposal output, and records diffs.
 
 Key file:
 
@@ -77,6 +77,9 @@ runs/<run_id>/
       workspace/
         .metaharness/
           AGENTS.md
+          bootstrap/
+            summary.md
+            snapshot.json
           experience/
       proposal/
         prompt.txt
@@ -88,6 +91,8 @@ runs/<run_id>/
       evaluation/result.json
 ```
 
+Each candidate manifest records whether the proposal was applied, whether validation passed, the objective score, and the explicit candidate outcome.
+
 ## Why Filesystem First Matters
 
 This design makes the system useful for real engineering work:
@@ -95,8 +100,12 @@ This design makes the system useful for real engineering work:
 - proposals are concrete file edits
 - failures are inspectable after the run
 - diffs can be reviewed by humans
+- environment facts are captured before the agent starts editing
+- candidate outcomes such as `keep`, `discard`, `crash`, `timeout`, `no-change`, and `scope-violation` are recorded explicitly
 - evaluation artifacts are easy to archive
 - the optimization history can be re-used by future iterations
+- reporting can export both run comparisons and per-candidate ledgers as TSV or JSON
+- experiment matrices can aggregate repeated trials across benchmarks, backends, budgets, and models
 
 ## How A Coding Tool Project Is Evaluated
 
@@ -113,6 +122,8 @@ Examples:
 - require context handoff guidance in `GEMINI.md`
 - require `scripts/bootstrap.sh` to build a working environment
 - require `scripts/test.sh` to pass a deterministic test suite
+
+Projects can also set `allowed_write_paths` in `metaharness.json` so only specific files or directories are mutable during optimization.
 
 ## What The Current OSS Version Focuses On
 

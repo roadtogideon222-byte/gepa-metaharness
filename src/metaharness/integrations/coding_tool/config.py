@@ -26,6 +26,7 @@ class CodingToolProject:
     runs_dir: Path
     tasks_file: Path
     required_files: list[str]
+    allowed_write_paths: list[str] = field(default_factory=list)
     backend_configs: dict[str, dict[str, Any]] = field(default_factory=dict)
     example_profile: str | None = None
     default_budget: int = 1
@@ -59,6 +60,7 @@ def load_coding_tool_project(project_dir: Path) -> CodingToolProject:
         runs_dir=project_dir / str(config.get("runs_dir", "runs")),
         tasks_file=tasks_file,
         required_files=[str(value) for value in config.get("required_files", [])],
+        allowed_write_paths=[str(value) for value in config.get("allowed_write_paths", [])],
         backend_configs=_load_backend_configs(config.get("backends", {})),
         example_profile=config.get("example_profile"),
         default_budget=int(config.get("default_budget", 1)),

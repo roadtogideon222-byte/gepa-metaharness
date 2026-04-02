@@ -34,6 +34,12 @@ What can change:
 - `scripts/validate.sh`
 - `scripts/test.sh`
 
+Configured write scope:
+
+- `AGENTS.md`
+- `GEMINI.md`
+- `scripts/`
+
 Typical runs:
 
 ```bash
@@ -62,6 +68,12 @@ What can change:
 - `scripts/bootstrap.sh`
 - `scripts/validate.sh`
 - `scripts/test.sh`
+
+Configured write scope:
+
+- `AGENTS.md`
+- `GEMINI.md`
+- `scripts/`
 
 Typical runs:
 
