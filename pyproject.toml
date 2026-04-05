@@ -3,54 +3,37 @@ requires = ["setuptools>=77", "wheel"]
 build-backend = "setuptools.build_meta"
 
 [project]
-name = "superagentic-metaharness"
-version = "0.1.2"
-description = "Unofficial implementation of the Meta Harness paper for coding-agent harness optimization."
+name = "gepa-metaharness"
+version = "0.1.0"
+description = "Meta-Harness architecture adapted for GEPA trading signal genome optimization. Forked from SuperagenticAI/metaharness."
 readme = "README.md"
 requires-python = ">=3.11"
 license = "Apache-2.0"
 license-files = ["LICENSE"]
 authors = [
-  { name = "Superagentic AI", email = "hello@super-agentic.ai" },
-  { name = "Shashi Jagtap", email = "shashikant.jagtap@icloud.com" },
-  { name = "Shashi Jagtap", email = "shashi@super-agentic.ai" },
-]
-maintainers = [
-  { name = "Superagentic AI", email = "hello@super-agentic.ai" },
+    { name = "Gideon / NEXUS" },
 ]
 classifiers = [
-  "Development Status :: 3 - Alpha",
-  "Intended Audience :: Developers",
-  "Programming Language :: Python :: 3",
-  "Programming Language :: Python :: 3.11",
-  "Programming Language :: Python :: 3.12",
-  "Programming Language :: Python :: 3.13",
-  "Topic :: Software Development :: Libraries :: Python Modules",
-  "Topic :: Software Development :: Testing",
+    "Development Status :: 3 - Alpha",
+    "Intended Audience :: Financial and Insurance Industries",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Programming Language :: Python :: 3.13",
+    "Topic :: Software Development :: Libraries :: Python Modules",
+    "Topic :: Scientific/Engineering :: Artificial Intelligence",
+    "Topic :: Financial",
 ]
-keywords = ["agents", "benchmarking", "codex", "evaluation", "harness", "optimization"]
+keywords = ["gepa", "trading", "signal", "genome", "optimization", "meta-harness", "evolution"]
 dependencies = []
-
-[project.urls]
-Homepage = "https://github.com/SuperagenticAI/metaharness"
-Documentation = "https://superagenticai.github.io/metaharness/"
-Repository = "https://github.com/SuperagenticAI/metaharness"
-Issues = "https://github.com/SuperagenticAI/metaharness/issues"
-
-[dependency-groups]
-dev = [
-  "mkdocs>=1.6,<2",
-  "mkdocs-material>=9.6,<10",
-]
 
 [project.optional-dependencies]
 dev = [
-  "mkdocs>=1.6,<2",
-  "mkdocs-material>=9.6,<10",
+    "mkdocs>=1.6,<2",
+    "mkdocs-material>=9.6,<10",
 ]
 
 [project.scripts]
-metaharness = "metaharness.cli:main"
+gepa-ge = "gepa_metaharness.cli:main"
 
 [tool.uv]
 package = true

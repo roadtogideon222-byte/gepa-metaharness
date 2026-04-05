@@ -33,11 +33,11 @@ def _standard_scaffold_files() -> dict[str, str]:
             profile_name="standard",
             run_codex_command="metaharness run . --backend codex --budget 2",
             extra_guidance=(
-                "- configure `backends.codex` in `metaharness.json` if you want hosted Codex or local Codex-over-Ollama"
+                "- configure `backends.codex` in `gepa_metaharness.json` if you want hosted Codex or local Codex-over-Ollama"
             ),
         ),
         ".gitignore": _gitignore(),
-        "metaharness.json": dedent(
+        "gepa_metaharness.json": dedent(
             """\
             {
               "objective": "Improve coding-agent instruction files and helper scripts so the tool behaves safely and predictably.",
@@ -175,7 +175,7 @@ def _local_oss_smoke_scaffold_files() -> dict[str, str]:
             ),
         ),
         ".gitignore": _gitignore(),
-        "metaharness.json": dedent(
+        "gepa_metaharness.json": dedent(
             """\
             {
               "objective": "Quickly improve a small coding-agent instruction harness with a fast local OSS smoke suite.",
@@ -271,7 +271,7 @@ def _local_oss_medium_scaffold_files() -> dict[str, str]:
             ),
         ),
         ".gitignore": _gitignore(),
-        "metaharness.json": dedent(
+        "gepa_metaharness.json": dedent(
             """\
             {
               "objective": "Improve a medium-size coding-agent instruction harness with local OSS Codex over Ollama.",
@@ -390,7 +390,7 @@ def _shared_readme(profile_name: str, run_codex_command: str, extra_guidance: st
         2. advanced users tuning AGENTS.md, GEMINI.md, and helper scripts around coding-agent tools
 
         The baseline workspace lives under `baseline/`.
-        The project is configured by `metaharness.json`.
+        The project is configured by `gepa_metaharness.json`.
         This scaffold was generated with the `{profile_name}` profile.
 
         Run it with the fake backend:
@@ -413,7 +413,7 @@ def _shared_readme(profile_name: str, run_codex_command: str, extra_guidance: st
 
         To adapt this scaffold to your real workflow:
 
-        - edit `metaharness.json` to define the objective, constraints, required files, and `allowed_write_paths`
+        - edit `gepa_metaharness.json` to define the objective, constraints, required files, and `allowed_write_paths`
         {extra_guidance}
         - replace `tasks.json` with deterministic `file_phrase` and `command` checks that match your workflow
         - expand `baseline/AGENTS.md`, `baseline/GEMINI.md`, and `baseline/scripts/`

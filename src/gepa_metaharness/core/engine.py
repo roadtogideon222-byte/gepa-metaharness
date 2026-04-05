@@ -51,7 +51,7 @@ class MetaHarnessEngine:
             allowed_actions=[
                 "Read and edit files inside the candidate workspace.",
                 "Use the bootstrap snapshot under .metaharness/bootstrap to avoid redundant exploration.",
-                "Inspect prior candidate artifacts under .metaharness.",
+                "Inspect prior candidate artifacts under .gepa_metaharness.",
                 "Use lightweight commands when needed to understand the workspace.",
             ],
             forbidden_actions=[

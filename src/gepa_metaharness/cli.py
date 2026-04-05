@@ -129,6 +129,20 @@ def main(argv: list[str] | None = None) -> int:
     compare_parser.add_argument("--json", action="store_true", dest="json_output")
     compare_parser.add_argument("--tsv", action="store_true", dest="tsv_output")
 
+    # GEPA critique subcommands
+    critique_parser = subparsers.add_parser("critique", help="Critique a genome against the GEPA constitution.")
+    critique_parser.add_argument("genome_file", help="Path to genome .py file")
+    critique_parser.add_argument("--model", default=None, help="LLM model for critique (default: claude-sonnet-4-7-2025)")
+    critique_parser.add_argument("--provider", default=None, choices=["anthropic", "openai", "ollama"])
+    critique_parser.add_argument("--api-key", default=None, dest="api_key")
+    critique_parser.add_argument("--base-url", default=None, dest="base_url")
+    critique_parser.add_argument("--max-iterations", type=int, default=3, dest="max_iterations")
+    critique_parser.add_argument("--store", action="store_true", help="Store critique to filesystem")
+    critique_parser.add_argument("--output-dir", default=None, dest="output_dir")
+    critique_parser.add_argument("--json", action="store_true", dest="json_output")
+
+    constitution_parser = subparsers.add_parser("constitution", help="Print the GEPA constitution.")
+
     args = parser.parse_args(argv)
 
     if args.command == "scaffold":
@@ -195,6 +209,10 @@ def main(argv: list[str] | None = None) -> int:
         return _cmd_summarize(Path(args.project_dir), args.json_output, args.tsv_output)
     if args.command == "compare":
         return _cmd_compare([Path(value) for value in args.run_dirs], args.json_output, args.tsv_output)
+    if args.command == "critique":
+        return _cmd_critique(args)
+    if args.command == "constitution":
+        return _cmd_constitution(args)
     raise RuntimeError(f"unknown command: {args.command}")
 
 
@@ -584,7 +602,7 @@ def _load_project(project_dir: Path):
     try:
         return load_coding_tool_project(project_dir)
     except FileNotFoundError as exc:
-        missing = exc.filename or str(project_dir / "metaharness.json")
+        missing = exc.filename or str(project_dir / "gepa_metaharness.json")
         raise SystemExit(f"Missing project file: {missing}") from exc
 
 
@@ -619,6 +637,91 @@ def _output_mode(json_output: bool, tsv_output: bool) -> str:
     if tsv_output:
         return "tsv"
     return "text"
+
+
+# ── GEPA Critique Commands ────────────────────────────────────────────────
+
+from .critique import ConstitutionalCritiqueEngine, CritiqueConfig, CritiqueLLMConfig
+from .critique import full_critique_summary, veto_summary
+from .constitution import CONSTITUTION, build_critique_prompt
+
+
+def _cmd_critique(args: argparse.Namespace) -> int:
+    """Run a single critique pass on a genome file."""
+    genome_path = Path(args.genome_file)
+    if not genome_path.exists():
+        raise SystemExit(f"Genome file not found: {genome_path}")
+
+    genome_source = genome_path.read_text(encoding="utf-8")
+
+    llm_cfg = CritiqueLLMConfig(
+        model=args.model or "claude-sonnet-4-7-2025",
+        provider=args.provider or "anthropic",
+        api_key=args.api_key,
+        base_url=args.base_url,
+        temperature=0.3,
+        max_tokens=2048,
+    )
+    critique_cfg = CritiqueConfig(
+        llm=llm_cfg,
+        max_iterations=args.max_iterations,
+        store_critiques=args.store,
+    )
+
+    engine = ConstitutionalCritiqueEngine(critique_cfg)
+
+    print(f"Running critique on {genome_path}...")
+    print(f"  model: {llm_cfg.model}")
+    print(f"  provider: {llm_cfg.provider}")
+    print(f"  max iterations: {args.max_iterations}")
+    print()
+
+    result = engine.critique_with_revision(genome_source)
+
+    print("━━━ CRITIQUE RESULT ━━━")
+    print(full_critique_summary(result))
+    print()
+
+    if args.json_output:
+        import json
+        print(json.dumps(result.to_dict(), indent=2))
+
+    if args.store and args.output_dir:
+        output_dir = Path(args.output_dir)
+        output_dir.mkdir(parents=True, exist_ok=True)
+        (output_dir / "critique_result.json").write_text(
+            json.dumps(result.to_dict(), indent=2), encoding="utf-8"
+        )
+        print(f"Stored critique result in {output_dir}")
+
+    return 0
+
+
+def _cmd_constitution(args: argparse.Namespace) -> int:
+    """Print the GEPA constitution."""
+    from .constitution import PrincipleTier, get_principles_by_tier
+
+    tiers = [
+        (PrincipleTier.VETO, "TIER 1 — HARD VETO (reject without backtest)"),
+        (PrincipleTier.PENALTY, "TIER 2 — PENALTY (reduce effective score)"),
+        (PrincipleTier.OPTIMIZE, "TIER 3 — OPTIMIZE (maximize objective)"),
+    ]
+
+    for tier, label in tiers:
+        principles = get_principles_by_tier(tier)
+        print(f"\n{label}")
+        print("=" * 60)
+        for p in principles:
+            print(f"\n[{p.id}]")
+            print(f"  {p.description}")
+            if p.metric_key:
+                print(f"  metric_key: {p.metric_key}")
+            if p.threshold is not None:
+                print(f"  threshold: {p.threshold}")
+            if p.weight:
+                print(f"  weight: {p.weight}")
+
+    return 0
 
 
 if __name__ == "__main__":

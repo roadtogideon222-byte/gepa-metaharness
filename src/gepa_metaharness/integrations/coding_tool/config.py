@@ -35,7 +35,7 @@ class CodingToolProject:
 
 def load_coding_tool_project(project_dir: Path) -> CodingToolProject:
     project_dir = project_dir.resolve()
-    config_path = project_dir / "metaharness.json"
+    config_path = project_dir / "gepa_metaharness.json"
     config = _read_json(config_path)
     tasks_file = project_dir / str(config.get("tasks_file", "tasks.json"))
     tasks_payload = json.loads(tasks_file.read_text(encoding="utf-8"))
@@ -74,7 +74,7 @@ def _read_json(path: Path) -> dict[str, Any]:
 
 def _load_backend_configs(raw_backends: Any) -> dict[str, dict[str, Any]]:
     if not isinstance(raw_backends, dict):
-        raise ValueError("metaharness.json field 'backends' must be an object")
+        raise ValueError("gepa_metaharness.json field 'backends' must be an object")
 
     normalized: dict[str, dict[str, Any]] = {}
     for name, config in raw_backends.items():
