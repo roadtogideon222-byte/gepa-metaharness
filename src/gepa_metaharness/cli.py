@@ -143,6 +143,24 @@ def main(argv: list[str] | None = None) -> int:
 
     constitution_parser = subparsers.add_parser("constitution", help="Print the GEPA constitution.")
 
+    # Trait monitoring subcommands
+    traits_parser = subparsers.add_parser("traits", help="Assess behavioral traits of a genome.")
+    traits_parser.add_argument("genome_file", help="Path to genome .py file")
+    traits_parser.add_argument("--generation", type=int, default=1, dest="generation")
+    traits_parser.add_argument("--model", default=None)
+    traits_parser.add_argument("--provider", default=None, choices=["anthropic", "openai", "ollama"])
+    traits_parser.add_argument("--api-key", default=None, dest="api_key")
+    traits_parser.add_argument("--base-url", default=None, dest="base_url")
+    traits_parser.add_argument("--history", default=None, dest="history_path")
+    traits_parser.add_argument("--json", action="store_true", dest="json_output")
+
+    traits_trend_parser = subparsers.add_parser("traits-trend", help="Show trait trend over generations.")
+    traits_trend_parser.add_argument("history_file", help="Path to trait_history.json")
+    traits_trend_parser.add_argument("--trait", default=None, choices=[t.value for t in TraitId])
+    traits_trend_parser.add_argument("--window", type=int, default=5, dest="window")
+
+    traits_list_parser = subparsers.add_parser("traits-list", help="List all trait IDs and thresholds.")
+
     args = parser.parse_args(argv)
 
     if args.command == "scaffold":
@@ -213,6 +231,12 @@ def main(argv: list[str] | None = None) -> int:
         return _cmd_critique(args)
     if args.command == "constitution":
         return _cmd_constitution(args)
+    if args.command == "traits":
+        return _cmd_traits(args)
+    if args.command == "traits-trend":
+        return _cmd_traits_trend(args)
+    if args.command == "traits-list":
+        return _cmd_traits_list(args)
     raise RuntimeError(f"unknown command: {args.command}")
 
 
@@ -644,6 +668,8 @@ def _output_mode(json_output: bool, tsv_output: bool) -> str:
 from .critique import ConstitutionalCritiqueEngine, CritiqueConfig, CritiqueLLMConfig
 from .critique import full_critique_summary, veto_summary
 from .constitution import CONSTITUTION, build_critique_prompt
+from .trait_monitor import TraitMonitor, TraitMonitorConfig, format_trait_report, format_trend_summary
+from .trait_monitor import TraitId, TRAIT_META
 
 
 def _cmd_critique(args: argparse.Namespace) -> int:
@@ -720,6 +746,107 @@ def _cmd_constitution(args: argparse.Namespace) -> int:
                 print(f"  threshold: {p.threshold}")
             if p.weight:
                 print(f"  weight: {p.weight}")
+
+    return 0
+
+
+def _cmd_traits(args: argparse.Namespace) -> int:
+    """Assess behavioral traits of a genome."""
+    genome_path = Path(args.genome_file)
+    if not genome_path.exists():
+        raise SystemExit(f"Genome file not found: {genome_path}")
+
+    genome_source = genome_path.read_text(encoding="utf-8")
+
+    llm_cfg = CritiqueLLMConfig(
+        model=args.model or "claude-sonnet-4-7-2025",
+        provider=args.provider or "anthropic",
+        api_key=args.api_key,
+    )
+    trait_cfg = TraitMonitorConfig(
+        llm=llm_cfg,
+        store_snapshots=args.history_path is not None,
+        assessment_interval=999,  # always assess when called directly
+    )
+    history_path = Path(args.history_path) if args.history_path else None
+    monitor = TraitMonitor(trait_cfg, history_path=history_path)
+
+    print(f"Assessing traits for {genome_path} (gen {args.generation})...")
+    print(f"  model: {llm_cfg.model}")
+    print()
+
+    report = monitor.assess(
+        genome_source=genome_source,
+        generation=args.generation,
+    )
+
+    print(format_trait_report(report))
+
+    if args.json_output:
+        import json
+        print(json.dumps(report.to_dict(), indent=2))
+
+    return 0
+
+
+def _cmd_traits_trend(args: argparse.Namespace) -> int:
+    """Show trait trend over generations from trait history."""
+    from .trait_monitor import TraitHistory
+
+    history_path = Path(args.history_file)
+    if not history_path.exists():
+        raise SystemExit(f"History file not found: {history_path}")
+
+    history = TraitHistory(storage_path=history_path)
+
+    if args.trait:
+        # Single trait trend
+        trend = history.decay_rate(args.trait, args.window)
+        latest = history.latest()
+        if latest and args.trait in latest.trait_scores:
+            latest_score = latest.trait_scores[args.trait]
+        else:
+            latest_score = None
+        print(f"Trait: {args.trait}")
+        print(f"  Latest score: {latest_score}")
+        print(f"  Decay rate per gen: {trend}")
+        if trend is not None:
+            print(f"  Trend: {'worsening' if trend > 0 else 'improving'}")
+    else:
+        # All traits
+        if not history.snapshots:
+            print("No trait history found.")
+            return 0
+        latest = history.latest()
+        print(f"Trait Trends — {len(history.snapshots)} snapshots")
+        print("=" * 50)
+        for trait_id in latest.trait_scores:
+            trend = history.decay_rate(trait_id, args.window)
+            print(f"\n{trait_id}:")
+            print(f"  Latest: {latest.trait_scores[trait_id]:.3f}")
+            print(f"  Decay/gen: {trend}")
+
+    return 0
+
+
+def _cmd_traits_list(args: argparse.Namespace) -> int:
+    """List all trait IDs and their thresholds."""
+    from .trait_monitor import TraitId, TRAIT_META
+
+    print("GEPA Trait Monitor — Trait Definitions")
+    print("=" * 60)
+    for trait_id in TraitId:
+        meta = TRAIT_META[trait_id]
+        print(f"\n[{trait_id.value}]")
+        print(f"  Description: {meta['description']}")
+        print(f"  Score range: {meta['score_range']}")
+        print(f"  Threshold: {meta['threshold']}")
+        print(f"  Weight: {meta['weight']}")
+
+    print("\n\nIntervention Trigger:")
+    print("  overall_trait_score > 0.60, OR")
+    print("  any single trait crosses its threshold, OR")
+    print("  most-drifted trait delta > 0.15")
 
     return 0
 

@@ -1,27 +1,27 @@
 """
-GEPA Runner — Constitutional critique + backtest outer loop.
+GEPA Runner — Constitutional critique + trait monitoring outer loop.
 
-Wraps the MetaHarnessEngine with the constitutional critique layer,
-producing the full CAI-inspired GEPA optimization loop:
+Full CAI-inspired + Anthropic stack GEPA optimization loop:
 
   Genome Proposal
        ↓
-  ConstitutionalCritiqueEngine.critique_with_revision()
+  ConstitutionalCritiqueEngine.critique_with_revision()    ← Layer 3: Validation
        ↓
   Tier 1 veto check ← reject if violations remain
        ↓
-  Backtest on historical data (TradingEvaluator)
+  Backtest on historical data
        ↓
-  apply_critique_penalties() ← Tier 2 reduction
-  score_from_tier3_metrics()  ← Tier 3 adjustment
+  apply_critique_penalties() + score_from_tier3_metrics() ← Layer 3 scoring
+       ↓
+  TraitMonitor.assess()                                    ← Layer 4: Trait Control
        ↓
   Update Pareto front
-  Store all artifacts to filesystem
+  Store all artifacts
        ↓
   Next iteration
 
-This is the GEPA-specific entry point, replacing the generic
-MetaHarnessEngine.run() for trading signal optimization.
+Layer 5 (Interpretability) is triggered selectively when trait monitoring
+flags unexplained failures.
 """
 from __future__ import annotations
 
@@ -45,6 +45,13 @@ from .critique import (
     veto_summary,
     full_critique_summary,
 )
+from .trait_monitor import (
+    TraitMonitor,
+    TraitMonitorConfig,
+    TraitReport,
+    format_trait_report,
+    format_trend_summary,
+)
 from .config.genome import GEPAProjectConfig
 
 
@@ -53,6 +60,8 @@ class GEPARunnerConfig:
     """Configuration for the GEPA runner."""
     # Critique
     critique_config: CritiqueConfig = field(default_factory=CritiqueConfig)
+    # Trait monitoring
+    trait_config: TraitMonitorConfig = field(default_factory=TraitMonitorConfig)
     # Max genomes to evaluate in one run
     max_candidates: int = 50
     # Min score to consider a genome "improving"
@@ -118,6 +127,13 @@ class GEPARunner:
 
         # Critique engine
         self._critique = ConstitutionalCritiqueEngine(runner_config.critique_config)
+
+        # Trait monitor (Layer 4)
+        trait_history_path = run_dir / "trait_history.json"
+        self._trait_monitor = TraitMonitor(
+            config=runner_config.trait_config,
+            history_path=trait_history_path,
+        )
 
         # Pareto front
         self._pareto: list[dict[str, Any]] = []
@@ -241,6 +257,51 @@ class GEPARunner:
                 critique=critique,
                 backtest_result=backtest_result,
             )
+
+            # ── LAYER 4: Trait Monitoring ──────────────────────────────
+            # Assess champion genome's behavioral traits periodically
+            champion_changed = candidate_id == best_id and is_keep
+            should_trait_check = (
+                (i + 1) % self.config.trait_config.assessment_interval == 0
+                or champion_changed
+            )
+
+            trait_report: TraitReport | None = None
+            if should_trait_check:
+                backtest_summary = {
+                    "sharpe": backtest_result.metrics.get("sharpe"),
+                    "win_rate": backtest_result.metrics.get("win_rate"),
+                    "max_drawdown": backtest_result.metrics.get("max_drawdown"),
+                }
+                trait_report = self._trait_monitor.assess(
+                    genome_source=genome_to_eval,
+                    generation=i + 1,
+                    backtest_summary=backtest_summary,
+                )
+
+                # Store trait report
+                if self.config.store_critiques:
+                    self._store_trait_report(candidate_id, trait_report)
+
+                # Log trait assessment
+                self._write_run_log({
+                    "event": "trait_assessment",
+                    "candidate_id": candidate_id,
+                    "overall_trait_score": trait_report.overall_trait_score,
+                    "intervention_recommended": trait_report.intervention_recommended,
+                    "most_drifted_trait": trait_report.most_drifted_trait,
+                    "trait_recommendations": trait_report.recommendations,
+                })
+
+                # Determine intervention type
+                if self._trait_monitor.should_intervene(trait_report):
+                    intervention = self._trait_monitor.get_intervention_type(trait_report)
+                    self._write_run_log({
+                        "event": "trait_intervention",
+                        "candidate_id": candidate_id,
+                        "intervention_type": intervention,
+                        "trait_report_summary": format_trait_report(trait_report)[:500],
+                    })
 
             # Update Pareto front
             if is_keep:
@@ -371,6 +432,17 @@ class GEPARunner:
         )
         (critique_dir / "raw_response.txt").write_text(
             critique.raw_llm_response, encoding="utf-8"
+        )
+
+    def _store_trait_report(self, candidate_id: str, report: TraitReport) -> None:
+        """Write trait report to filesystem."""
+        trait_dir = self.run_dir / "candidates" / candidate_id / "traits"
+        trait_dir.mkdir(parents=True, exist_ok=True)
+        (trait_dir / "report.json").write_text(
+            json.dumps(report.to_dict(), indent=2), encoding="utf-8"
+        )
+        (trait_dir / "raw_response.txt").write_text(
+            report.raw_llm_response, encoding="utf-8"
         )
 
     def _write_candidate_manifest(
